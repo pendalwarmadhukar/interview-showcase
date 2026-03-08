@@ -156,6 +156,7 @@ const ProfileSettings = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Profile Settings" description="Manage your InterviewAI profile, avatar, and password." />
       <Navbar />
       <div className="container py-12 max-w-lg">
         <div className="text-center mb-8 animate-slide-up">
