@@ -16,6 +16,9 @@ import {
   VolumeX,
   Mic,
   MicOff,
+  Timer,
+  Pause,
+  Play,
 } from "lucide-react";
 import { useSpeech, useRecognition } from "@/hooks/use-voice";
 import { supabase } from "@/integrations/supabase/client";
