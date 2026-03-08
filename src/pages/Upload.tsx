@@ -31,6 +31,13 @@ const extractTextFromFile = async (file: File): Promise<string> => {
   });
 };
 
+const Upload = () => {
+  const navigate = useNavigate();
+  const [jobText, setJobText] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+
   const handleFileDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
