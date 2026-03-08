@@ -78,16 +78,16 @@ const Upload = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-questions", {
-        body: { jobDescription: description, questionCount: 5 },
+        body: { jobDescription: description, questionCount },
       });
 
       if (error) throw error;
       if (data.error) throw new Error(data.error);
 
-      // Store in sessionStorage for the interview page
       sessionStorage.setItem("interview_data", JSON.stringify({
         jobDescription: description,
         questions: data.questions,
+        timeLimit,
       }));
 
       navigate("/interview");
