@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { mongodb } from "@/lib/mongodb";
 import { useAuth } from "@/contexts/AuthContext";
+import SEOHead from "@/components/SEOHead";
+import SkeletonCard from "@/components/SkeletonCard";
+import EmptyState from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -54,9 +57,19 @@ const Dashboard = () => {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background">
+        <SEOHead title="Dashboard" description="Track your mock interview performance with detailed analytics." />
         <Navbar />
-        <div className="container py-16 flex justify-center">
-          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        <div className="container py-12 max-w-5xl">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonCard key={i} lines={2} />
+            ))}
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonCard key={i} lines={6} />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -101,6 +114,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Dashboard" description="Track your mock interview performance with detailed analytics." />
       <Navbar />
       <div className="container py-12 max-w-5xl">
         <div className="flex items-center justify-between mb-8">
@@ -117,11 +131,13 @@ const Dashboard = () => {
         </div>
 
         {isEmpty ? (
-          <div className="text-center py-20 rounded-lg border border-border/60 bg-card">
-            <Target className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground text-sm mb-4">Complete your first interview to see analytics</p>
-            <Button onClick={() => navigate("/upload")} variant="outline">Start Interview</Button>
-          </div>
+          <EmptyState
+            icon={Target}
+            title="No interviews yet"
+            description="Complete your first interview to see analytics and track your progress over time."
+            actionLabel="Start Interview"
+            onAction={() => navigate("/upload")}
+          />
         ) : (
           <>
             {/* Stats row */}

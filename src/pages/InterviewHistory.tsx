@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { mongodb } from "@/lib/mongodb";
 import { useAuth } from "@/contexts/AuthContext";
+import SEOHead from "@/components/SEOHead";
+import SkeletonCard from "@/components/SkeletonCard";
+import EmptyState from "@/components/EmptyState";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, History, Target, TrendingUp, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
@@ -80,9 +83,12 @@ const InterviewHistory = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
+        <SEOHead title="Interview History" description="Review your past mock interviews and track your improvement." />
         <Navbar />
-        <div className="container py-16 flex justify-center">
-          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        <div className="container py-12 max-w-3xl space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonCard key={i} lines={3} showAvatar />
+          ))}
         </div>
       </div>
     );
@@ -90,6 +96,7 @@ const InterviewHistory = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Interview History" description="Review your past mock interviews and track your improvement." />
       <Navbar />
       <div className="container py-12 max-w-3xl">
         <div className="flex items-center justify-between mb-8">
@@ -108,13 +115,13 @@ const InterviewHistory = () => {
         </div>
 
         {interviews.length === 0 ? (
-          <div className="text-center py-16 rounded-lg border border-border/60 bg-card">
-            <Target className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground text-sm">No interviews yet. Start your first one!</p>
-            <Button onClick={() => navigate("/upload")} className="mt-4" variant="outline">
-              Start Interview
-            </Button>
-          </div>
+          <EmptyState
+            icon={Target}
+            title="No interviews yet"
+            description="Complete your first mock interview and it will appear here."
+            actionLabel="Start Interview"
+            onAction={() => navigate("/upload")}
+          />
         ) : (
           <div className="space-y-3">
             {interviews.map((interview) => (

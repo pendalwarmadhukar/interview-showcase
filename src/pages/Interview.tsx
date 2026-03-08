@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
+import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -157,6 +158,7 @@ const Interview = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title={`Question ${currentIndex + 1} of ${questions.length}`} description="Practice your interview answers with real-time AI feedback." />
       <Navbar />
       <div className="container py-8 max-w-3xl">
         {/* Progress */}

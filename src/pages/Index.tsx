@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
+import SEOHead from "@/components/SEOHead";
+import OnboardingDialog from "@/components/OnboardingDialog";
 import { Sparkles, FileText, MessageSquare, Trophy, ArrowRight } from "lucide-react";
 
 const steps = [
@@ -29,6 +31,8 @@ const steps = [
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="AI Mock Interview Practice" description="Practice job interviews with AI-generated questions tailored to your job description. Get instant feedback and improve your interview skills." />
+      <OnboardingDialog />
       <Navbar />
 
       {/* Hero */}

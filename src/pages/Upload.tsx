@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
+import SEOHead from "@/components/SEOHead";
 import { Upload as UploadIcon, FileText, Loader2, Sparkles, Settings2, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -192,6 +193,7 @@ const Upload = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title={isCustom ? "Upload Questions" : "Upload Job Description"} description="Upload a job description or custom questions to start your AI-powered mock interview." />
       <Navbar />
       <div className="container py-12 max-w-2xl">
         <div className="text-center mb-10 animate-slide-up">

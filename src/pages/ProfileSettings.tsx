@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/contexts/AuthContext";
+import SEOHead from "@/components/SEOHead";
+import ChangePassword from "@/components/ChangePassword";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -154,6 +156,7 @@ const ProfileSettings = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Profile Settings" description="Manage your InterviewAI profile, avatar, and password." />
       <Navbar />
       <div className="container py-12 max-w-lg">
         <div className="text-center mb-8 animate-slide-up">
@@ -260,6 +263,11 @@ const ProfileSettings = () => {
               <><Save className="w-4 h-4" /> Save Changes</>
             )}
           </Button>
+        </div>
+
+        {/* Change Password */}
+        <div className="animate-slide-up">
+          <ChangePassword />
         </div>
       </div>
     </div>

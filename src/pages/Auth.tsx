@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
+import SEOHead from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,6 +60,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title={mode === "login" ? "Sign In" : mode === "signup" ? "Create Account" : "Reset Password"} description="Sign in or create your InterviewAI account to track progress and save interviews." />
       <Navbar />
       <div className="container py-16 max-w-sm">
         <div className="text-center mb-8 animate-slide-up">
