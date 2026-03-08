@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
-import { Upload as UploadIcon, FileText, Loader2, Sparkles, AlertCircle } from "lucide-react";
+import { Upload as UploadIcon, FileText, Loader2, Sparkles, AlertCircle, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
