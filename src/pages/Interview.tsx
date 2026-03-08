@@ -80,10 +80,15 @@ const Interview = () => {
     setJobDescription(data.jobDescription);
   }, [navigate]);
 
-  // Auto-speak question when it changes
+  // Auto-speak question and reset timer when question changes
   useEffect(() => {
     if (currentQuestion && autoSpeak && !answers[currentIndex]?.submitted) {
       speak(currentQuestion.question);
+    }
+    if (currentQuestion && !answers[currentIndex]?.submitted) {
+      timer.restart();
+    } else {
+      timer.reset();
     }
     return () => stopSpeaking();
   }, [currentIndex, questions.length]);
