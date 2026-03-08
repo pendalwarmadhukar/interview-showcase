@@ -56,7 +56,9 @@ const Interview = () => {
   const [answers, setAnswers] = useState<Record<number, AnswerData>>({});
   const [showHint, setShowHint] = useState(false);
   const [evaluating, setEvaluating] = useState(false);
-
+  const [autoSpeak, setAutoSpeak] = useState(true);
+  const { speak, stop: stopSpeaking, isSpeaking } = useSpeech();
+  const { start: startListening, stop: stopListening, isListening } = useRecognition();
   useEffect(() => {
     const raw = sessionStorage.getItem("interview_data");
     if (!raw) {
