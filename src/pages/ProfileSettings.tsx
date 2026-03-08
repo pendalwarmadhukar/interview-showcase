@@ -197,6 +197,18 @@ const ProfileSettings = () => {
               />
             </div>
             <p className="text-xs text-muted-foreground">Click avatar to change • Max 2MB</p>
+            {avatarUrl && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={deleteAvatar}
+                disabled={uploading}
+                className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="w-3.5 h-3.5 mr-1" />
+                Remove avatar
+              </Button>
+            )}
           </div>
 
           {/* Display Name */}
