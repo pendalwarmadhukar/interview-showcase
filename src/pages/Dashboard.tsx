@@ -57,9 +57,19 @@ const Dashboard = () => {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background">
+        <SEOHead title="Dashboard" description="Track your mock interview performance with detailed analytics." />
         <Navbar />
-        <div className="container py-16 flex justify-center">
-          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        <div className="container py-12 max-w-5xl">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonCard key={i} lines={2} />
+            ))}
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonCard key={i} lines={6} />
+            ))}
+          </div>
         </div>
       </div>
     );
