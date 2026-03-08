@@ -77,6 +77,38 @@ const ProfileSettings = () => {
     }
   };
 
+  const deleteAvatar = async () => {
+    if (!user || !avatarUrl) return;
+    setUploading(true);
+    try {
+      const { data: files } = await supabase.storage
+        .from("avatars")
+        .list(user.id);
+
+      if (files?.length) {
+        const paths = files.map((f) => `${user.id}/${f.name}`);
+        const { error: removeError } = await supabase.storage
+          .from("avatars")
+          .remove(paths);
+        if (removeError) throw removeError;
+      }
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: null, updated_at: new Date().toISOString() })
+        .eq("id", user.id);
+      if (updateError) throw updateError;
+
+      setAvatarUrl(null);
+      toast.success("Avatar removed!");
+    } catch (e: any) {
+      console.error("Delete avatar error:", e);
+      toast.error(e.message || "Failed to delete avatar");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const saveProfile = async () => {
     if (!user) return;
     setSaving(true);
