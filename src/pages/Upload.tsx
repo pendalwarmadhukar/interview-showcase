@@ -48,8 +48,8 @@ const Upload = () => {
     if (!description && file) {
       try {
         description = await extractTextFromFile(file);
-      } catch {
-        toast.error("Failed to read file");
+      } catch (e: any) {
+        toast.error(e.message || "Failed to read file");
         return;
       }
     }
