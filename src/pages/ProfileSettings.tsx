@@ -9,6 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { Loader2, Camera, User, Save, Trash2 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const ProfileSettings = () => {
   const navigate = useNavigate();
@@ -198,16 +203,33 @@ const ProfileSettings = () => {
             </div>
             <p className="text-xs text-muted-foreground">Click avatar to change • Max 2MB</p>
             {avatarUrl && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={deleteAvatar}
-                disabled={uploading}
-                className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
-              >
-                <Trash2 className="w-3.5 h-3.5 mr-1" />
-                Remove avatar
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={uploading}
+                    className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 mr-1" />
+                    Remove avatar
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Remove avatar?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Your avatar will be deleted and replaced with your initials. This cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={deleteAvatar} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      Remove
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
 
