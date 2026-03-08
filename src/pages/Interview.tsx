@@ -70,6 +70,14 @@ const Interview = () => {
     setJobDescription(data.jobDescription);
   }, [navigate]);
 
+  // Auto-speak question when it changes
+  useEffect(() => {
+    if (currentQuestion && autoSpeak && !answers[currentIndex]?.submitted) {
+      speak(currentQuestion.question);
+    }
+    return () => stopSpeaking();
+  }, [currentIndex, questions.length]);
+
   const currentQuestion = questions[currentIndex];
   const currentAnswer = answers[currentIndex] || { answer: "", evaluation: null, submitted: false };
 
