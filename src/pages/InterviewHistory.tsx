@@ -39,11 +39,12 @@ const InterviewHistory = () => {
   useEffect(() => {
     if (!user) return;
     const fetchInterviews = async () => {
-      const { data, error } = await supabase
-        .from("interviews")
-        .select("*")
-        .order("completed_at", { ascending: false });
-      if (!error && data) setInterviews(data as InterviewRecord[]);
+      try {
+        const result = await mongodb.getInterviews();
+        if (result?.data) setInterviews(result.data as InterviewRecord[]);
+      } catch (e) {
+        console.error("Fetch interviews error:", e);
+      }
       setLoading(false);
     };
     fetchInterviews();
