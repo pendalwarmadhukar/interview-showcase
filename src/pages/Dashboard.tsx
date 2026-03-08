@@ -114,6 +114,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Dashboard" description="Track your mock interview performance with detailed analytics." />
       <Navbar />
       <div className="container py-12 max-w-5xl">
         <div className="flex items-center justify-between mb-8">
