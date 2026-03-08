@@ -74,6 +74,7 @@ export type Database = {
           created_at: string
           id: string
           job_description: string
+          share_token: string | null
           total_questions: number
           user_id: string
         }
@@ -83,6 +84,7 @@ export type Database = {
           created_at?: string
           id?: string
           job_description: string
+          share_token?: string | null
           total_questions?: number
           user_id: string
         }
@@ -92,6 +94,7 @@ export type Database = {
           created_at?: string
           id?: string
           job_description?: string
+          share_token?: string | null
           total_questions?: number
           user_id?: string
         }

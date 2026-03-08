@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RotateCcw, Trophy, Target, TrendingUp, ChevronDown, ChevronUp, Save, Loader2, Download } from "lucide-react";
+import { RotateCcw, Trophy, Target, TrendingUp, ChevronDown, ChevronUp, Save, Loader2, Download, Share2, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -33,6 +33,9 @@ const Results = () => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [sharing, setSharing] = useState(false);
+  const [interviewId, setInterviewId] = useState<string | null>(null);
 
   useEffect(() => {
     const raw = sessionStorage.getItem("interview_results");
@@ -71,6 +74,7 @@ const Results = () => {
         .single();
 
       if (intError) throw intError;
+      setInterviewId(interview.id);
 
       const answers = results.map((r) => ({
         interview_id: interview.id,
@@ -95,6 +99,31 @@ const Results = () => {
       toast.error("Failed to save interview");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const shareResults = async () => {
+    if (!user || !interviewId) {
+      toast.error("Please sign in and save your interview first");
+      return;
+    }
+    setSharing(true);
+    try {
+      const token = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+      const { error } = await supabase
+        .from("interviews")
+        .update({ share_token: token })
+        .eq("id", interviewId);
+      if (error) throw error;
+      const url = `${window.location.origin}/shared/${token}`;
+      setShareUrl(url);
+      await navigator.clipboard.writeText(url);
+      toast.success("Share link copied to clipboard!");
+    } catch (e: any) {
+      console.error("Share error:", e);
+      toast.error("Failed to create share link");
+    } finally {
+      setSharing(false);
     }
   };
 
@@ -296,13 +325,29 @@ const Results = () => {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3 mt-8">
+        <div className="flex flex-wrap gap-3 mt-8">
           <Button variant="outline" className="flex-1" onClick={() => navigate("/upload")}>
             <RotateCcw className="w-4 h-4" /> Try Another
           </Button>
           <Button variant="outline" className="flex-1" onClick={downloadResults}>
             <Download className="w-4 h-4" /> Download
           </Button>
+          {user && saved && (
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={shareResults}
+              disabled={sharing || !!shareUrl}
+            >
+              {sharing ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Sharing...</>
+              ) : shareUrl ? (
+                <><Check className="w-4 h-4" /> Link Copied</>
+              ) : (
+                <><Share2 className="w-4 h-4" /> Share</>
+              )}
+            </Button>
+          )}
           {user && (
             <Button variant="outline" className="flex-1" onClick={() => navigate("/history")}>
               View History

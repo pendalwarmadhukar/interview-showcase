@@ -10,7 +10,7 @@ import { Loader2, Mail, Lock, User } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true);
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,13 +21,20 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      if (isLogin) {
+      if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        toast.success("Password reset link sent to your email!");
+        setMode("login");
+      } else if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back!");
         navigate("/");
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -36,7 +43,12 @@ const Auth = () => {
           },
         });
         if (error) throw error;
-        toast.success("Check your email to confirm your account!");
+        if (data.session) {
+          toast.success("Account created! You're now signed in.");
+          navigate("/");
+        } else {
+          toast.success("Check your email to confirm your account!");
+        }
       }
     } catch (e: any) {
       toast.error(e.message || "Authentication failed");
@@ -51,15 +63,19 @@ const Auth = () => {
       <div className="container py-16 max-w-sm">
         <div className="text-center mb-8 animate-slide-up">
           <h1 className="text-2xl font-bold font-display mb-2">
-            {isLogin ? "Welcome Back" : "Create Account"}
+            {mode === "login" ? "Welcome Back" : mode === "signup" ? "Create Account" : "Reset Password"}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {isLogin ? "Sign in to track your progress" : "Start your interview prep journey"}
+            {mode === "login"
+              ? "Sign in to track your progress"
+              : mode === "signup"
+              ? "Start your interview prep journey"
+              : "Enter your email to receive a reset link"}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 animate-slide-up">
-          {!isLogin && (
+          {mode === "signup" && (
             <div className="space-y-2">
               <Label htmlFor="name" className="text-xs">Display Name</Label>
               <div className="relative">
@@ -70,7 +86,7 @@ const Auth = () => {
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Your name"
                   className="pl-10 bg-card border-border/60"
-                  required={!isLogin}
+                  required
                 />
               </div>
             </div>
@@ -92,41 +108,53 @@ const Auth = () => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-xs">Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="pl-10 bg-card border-border/60"
-                minLength={6}
-                required
-              />
+          {mode !== "forgot" && (
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-xs">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="pl-10 bg-card border-border/60"
+                  minLength={6}
+                  required
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           <Button type="submit" disabled={loading} className="w-full glow-primary">
             {loading ? (
               <><Loader2 className="w-4 h-4 animate-spin" /> Please wait...</>
-            ) : isLogin ? (
+            ) : mode === "login" ? (
               "Sign In"
-            ) : (
+            ) : mode === "signup" ? (
               "Create Account"
+            ) : (
+              "Send Reset Link"
             )}
           </Button>
         </form>
 
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+        {mode === "login" && (
+          <p className="text-center text-xs text-muted-foreground mt-4">
+            <button onClick={() => setMode("forgot")} className="text-primary hover:underline font-medium">
+              Forgot password?
+            </button>
+          </p>
+        )}
+
+        <p className="text-center text-xs text-muted-foreground mt-4">
+          {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
           <button
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => setMode(mode === "login" ? "signup" : "login")}
             className="text-primary hover:underline font-medium"
           >
-            {isLogin ? "Sign up" : "Sign in"}
+            {mode === "login" ? "Sign up" : "Sign in"}
           </button>
         </p>
       </div>

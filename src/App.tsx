@@ -9,6 +9,8 @@ import Upload from "./pages/Upload";
 import Interview from "./pages/Interview";
 import Results from "./pages/Results";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
+import SharedResults from "./pages/SharedResults";
 import InterviewHistory from "./pages/InterviewHistory";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
@@ -28,6 +30,8 @@ const App = () => (
             <Route path="/upload" element={<Upload />} />
             <Route path="/interview" element={<Interview />} />
             <Route path="/results" element={<Results />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/shared/:id" element={<SharedResults />} />
             <Route path="/history" element={<InterviewHistory />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="*" element={<NotFound />} />
