@@ -12,7 +12,12 @@ import {
   Send,
   CheckCircle2,
   Trophy,
+  Volume2,
+  VolumeX,
+  Mic,
+  MicOff,
 } from "lucide-react";
+import { useSpeech, useRecognition } from "@/hooks/use-voice";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
