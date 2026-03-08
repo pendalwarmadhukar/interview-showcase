@@ -33,6 +33,9 @@ const Results = () => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [sharing, setSharing] = useState(false);
+  const [interviewId, setInterviewId] = useState<string | null>(null);
 
   useEffect(() => {
     const raw = sessionStorage.getItem("interview_results");

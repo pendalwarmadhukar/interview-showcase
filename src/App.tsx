@@ -30,6 +30,8 @@ const App = () => (
             <Route path="/upload" element={<Upload />} />
             <Route path="/interview" element={<Interview />} />
             <Route path="/results" element={<Results />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/shared/:id" element={<SharedResults />} />
             <Route path="/history" element={<InterviewHistory />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="*" element={<NotFound />} />
