@@ -74,6 +74,7 @@ const Results = () => {
         .single();
 
       if (intError) throw intError;
+      setInterviewId(interview.id);
 
       const answers = results.map((r) => ({
         interview_id: interview.id,
