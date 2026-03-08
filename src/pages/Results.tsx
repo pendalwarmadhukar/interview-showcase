@@ -62,23 +62,7 @@ const Results = () => {
       const jd = jobDescription ? JSON.parse(jobDescription).jobDescription : "Unknown";
       const avgScore = results.reduce((sum, r) => sum + (r.evaluation?.score || 0), 0) / results.length;
 
-      const { data: interview, error: intError } = await supabase
-        .from("interviews")
-        .insert({
-          user_id: user.id,
-          job_description: jd,
-          average_score: parseFloat(avgScore.toFixed(2)),
-          total_questions: results.length,
-        })
-        .select("id")
-        .single();
-
-      if (intError) throw intError;
-      setInterviewId(interview.id);
-
       const answers = results.map((r) => ({
-        interview_id: interview.id,
-        user_id: user.id,
         question_text: r.question.question,
         question_type: r.question.type,
         answer_text: r.answer,
@@ -89,9 +73,14 @@ const Results = () => {
         overall_feedback: r.evaluation?.overallFeedback || null,
       }));
 
-      const { error: ansError } = await supabase.from("interview_answers").insert(answers);
-      if (ansError) throw ansError;
+      const result = await mongodb.saveInterview({
+        job_description: jd,
+        average_score: parseFloat(avgScore.toFixed(2)),
+        total_questions: results.length,
+        answers,
+      });
 
+      setInterviewId(result.id);
       setSaved(true);
       toast.success("Interview saved to your history!");
     } catch (e: any) {
