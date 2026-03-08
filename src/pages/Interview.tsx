@@ -109,6 +109,7 @@ const Interview = () => {
       return;
     }
     setEvaluating(true);
+    timer.pause();
     try {
       const { data, error } = await supabase.functions.invoke("evaluate-answer", {
         body: {
