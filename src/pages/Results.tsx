@@ -325,13 +325,29 @@ const Results = () => {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3 mt-8">
+        <div className="flex flex-wrap gap-3 mt-8">
           <Button variant="outline" className="flex-1" onClick={() => navigate("/upload")}>
             <RotateCcw className="w-4 h-4" /> Try Another
           </Button>
           <Button variant="outline" className="flex-1" onClick={downloadResults}>
             <Download className="w-4 h-4" /> Download
           </Button>
+          {user && saved && (
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={shareResults}
+              disabled={sharing || !!shareUrl}
+            >
+              {sharing ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Sharing...</>
+              ) : shareUrl ? (
+                <><Check className="w-4 h-4" /> Link Copied</>
+              ) : (
+                <><Share2 className="w-4 h-4" /> Share</>
+              )}
+            </Button>
+          )}
           {user && (
             <Button variant="outline" className="flex-1" onClick={() => navigate("/history")}>
               View History
