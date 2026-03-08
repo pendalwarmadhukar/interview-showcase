@@ -259,7 +259,6 @@ const Interview = () => {
                   <Send className="w-4 h-4" /> Submit Answer
                 </>
               )}
-              )}
             </Button>
           </div>
         ) : (
