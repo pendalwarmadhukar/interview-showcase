@@ -21,6 +21,7 @@ import {
   Play,
 } from "lucide-react";
 import { useSpeech, useRecognition } from "@/hooks/use-voice";
+import { useTimer } from "@/hooks/use-timer";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
