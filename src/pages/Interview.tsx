@@ -63,6 +63,12 @@ const Interview = () => {
   const [autoSpeak, setAutoSpeak] = useState(true);
   const { speak, stop: stopSpeaking, isSpeaking } = useSpeech();
   const { start: startListening, stop: stopListening, isListening } = useRecognition();
+
+  const handleTimeUp = useCallback(() => {
+    toast.warning("Time's up! Submit your answer now.");
+  }, []);
+  const timer = useTimer(handleTimeUp);
+
   useEffect(() => {
     const raw = sessionStorage.getItem("interview_data");
     if (!raw) {
