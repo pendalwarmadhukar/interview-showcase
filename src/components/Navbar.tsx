@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Terminal, Sparkles, History, LogIn, LogOut } from "lucide-react";
+import { Terminal, Sparkles, History, LogIn, LogOut, BarChart3 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 
@@ -26,13 +26,22 @@ const Navbar = () => {
             New Interview
           </Link>
           {user && (
-            <Link
-              to="/history"
-              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
-            >
-              <History className="w-4 h-4" />
-              History
-            </Link>
+            <>
+              <Link
+                to="/history"
+                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
+              >
+                <History className="w-4 h-4" />
+                History
+              </Link>
+              <Link
+                to="/dashboard"
+                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
+              >
+                <BarChart3 className="w-4 h-4" />
+                Dashboard
+              </Link>
+            </>
           )}
           {user ? (
             <Button variant="ghost" size="sm" onClick={signOut} className="text-xs text-muted-foreground">
