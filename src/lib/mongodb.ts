@@ -108,7 +108,9 @@ export const mongodb = {
       .from("interviews")
       .select("id, job_description, average_score, total_questions, completed_at")
       .eq("share_token", token)
-      .single();
+      .maybeSingle();
+
+    if (!interview) throw new Error("Shared interview not found");
 
     if (intError) throw intError;
 
