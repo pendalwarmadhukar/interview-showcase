@@ -194,7 +194,8 @@ const Upload = () => {
               <>
                 <UploadIcon className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
                 <p className="text-sm text-muted-foreground">
-                  Drop a <span className="text-primary font-medium">.pdf</span> or{" "}
+                  Drop a <span className="text-primary font-medium">.pdf</span>,{" "}
+                  <span className="text-primary font-medium">.docx</span>, or{" "}
                   <span className="text-primary font-medium">.txt</span> file here
                 </p>
                 <p className="text-xs text-muted-foreground/60 mt-1">or click to browse</p>
