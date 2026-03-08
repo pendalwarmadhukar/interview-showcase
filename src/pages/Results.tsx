@@ -98,13 +98,8 @@ const Results = () => {
     }
     setSharing(true);
     try {
-      const token = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
-      const { error } = await supabase
-        .from("interviews")
-        .update({ share_token: token })
-        .eq("id", interviewId);
-      if (error) throw error;
-      const url = `${window.location.origin}/shared/${token}`;
+      const result = await mongodb.shareInterview(interviewId);
+      const url = `${window.location.origin}/shared/${result.token}`;
       setShareUrl(url);
       await navigator.clipboard.writeText(url);
       toast.success("Share link copied to clipboard!");
