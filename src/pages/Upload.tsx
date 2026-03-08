@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
-import { Upload as UploadIcon, FileText, Loader2, Sparkles, AlertCircle, Settings2 } from "lucide-react";
+import { Upload as UploadIcon, FileText, Loader2, Sparkles, Settings2, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,7 +16,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs
 const extractTextFromFile = async (file: File): Promise<string> => {
   const name = file.name.toLowerCase();
 
-  // PDF extraction
   if (file.type === "application/pdf" || name.endsWith(".pdf")) {
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -26,27 +25,24 @@ const extractTextFromFile = async (file: File): Promise<string> => {
       const content = await page.getTextContent();
       text += content.items.map((item: any) => item.str).join(" ") + "\n";
     }
-    if (!text.trim()) throw new Error("Could not extract text from this PDF. Please paste the content manually.");
+    if (!text.trim()) throw new Error("Could not extract text from this PDF.");
     return text.trim();
   }
 
-  // DOCX extraction
   if (
     file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
     name.endsWith(".docx")
   ) {
     const arrayBuffer = await file.arrayBuffer();
     const result = await mammoth.extractRawText({ arrayBuffer });
-    if (!result.value.trim()) throw new Error("Could not extract text from this DOCX. Please paste the content manually.");
+    if (!result.value.trim()) throw new Error("Could not extract text from this DOCX.");
     return result.value.trim();
   }
 
-  // DOC warning
   if (name.endsWith(".doc")) {
-    throw new Error("Legacy .doc format is not supported. Please save as .docx or paste the content manually.");
+    throw new Error("Legacy .doc format is not supported. Please save as .docx.");
   }
 
-  // Plain text fallback (txt, etc.)
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => resolve(e.target?.result as string);
@@ -55,8 +51,45 @@ const extractTextFromFile = async (file: File): Promise<string> => {
   });
 };
 
+/** Parse raw text into question objects. Supports numbered lists, bullet points, or line-separated questions. */
+const parseQuestionsFromText = (text: string) => {
+  const lines = text
+    .split(/\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 5);
+
+  // Try to detect numbered/bulleted questions
+  const questionPattern = /^(?:\d+[\.\)\-]|[-•*])\s*(.+)/;
+  let questions = lines
+    .map((line) => {
+      const match = line.match(questionPattern);
+      return match ? match[1].trim() : null;
+    })
+    .filter(Boolean) as string[];
+
+  // If no numbered/bulleted items found, treat each line ending with ? as a question
+  if (questions.length === 0) {
+    questions = lines.filter((l) => l.endsWith("?"));
+  }
+
+  // Last fallback: treat every non-empty line as a question
+  if (questions.length === 0) {
+    questions = lines;
+  }
+
+  return questions.map((q, i) => ({
+    id: i + 1,
+    question: q,
+    type: "general" as const,
+    hint: "This is a custom question from your uploaded file.",
+  }));
+};
+
+type UploadMode = "job-description" | "custom-questions";
+
 const Upload = () => {
   const navigate = useNavigate();
+  const [mode, setMode] = useState<UploadMode>("job-description");
   const [jobText, setJobText] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -85,45 +118,77 @@ const Upload = () => {
   };
 
   const handleStart = async () => {
-    let description = jobText.trim();
+    let text = jobText.trim();
 
-    if (!description && file) {
+    if (!text && file) {
       try {
-        description = await extractTextFromFile(file);
+        text = await extractTextFromFile(file);
       } catch (e: any) {
         toast.error(e.message || "Failed to read file");
         return;
       }
     }
 
-    if (!description) {
-      toast.error("Please paste a job description or upload a file");
+    if (!text) {
+      toast.error(mode === "custom-questions"
+        ? "Please paste your questions or upload a questions file"
+        : "Please paste a job description or upload a file");
       return;
     }
 
     setLoading(true);
+
     try {
-      const { data, error } = await supabase.functions.invoke("generate-questions", {
-        body: { jobDescription: description, questionCount, difficulty },
-      });
+      if (mode === "custom-questions") {
+        // Parse questions directly from the text — no AI call
+        const questions = parseQuestionsFromText(text);
 
-      if (error) throw error;
-      if (data.error) throw new Error(data.error);
+        if (questions.length === 0) {
+          toast.error("No questions found in the text. Please check the format.");
+          setLoading(false);
+          return;
+        }
 
-      sessionStorage.setItem("interview_data", JSON.stringify({
-        jobDescription: description,
-        questions: data.questions,
-        timeLimit,
-      }));
+        sessionStorage.setItem("interview_data", JSON.stringify({
+          jobDescription: "Custom Questions",
+          questions,
+          timeLimit,
+        }));
 
-      navigate("/interview");
+        toast.success(`${questions.length} questions loaded!`);
+        navigate("/interview");
+      } else {
+        // AI-generated questions from job description
+        const { data, error } = await supabase.functions.invoke("generate-questions", {
+          body: { jobDescription: text, questionCount, difficulty },
+        });
+
+        if (error) throw error;
+        if (data.error) throw new Error(data.error);
+
+        sessionStorage.setItem("interview_data", JSON.stringify({
+          jobDescription: text,
+          questions: data.questions,
+          timeLimit,
+        }));
+
+        navigate("/interview");
+      }
     } catch (e: any) {
       console.error(e);
-      toast.error(e.message || "Failed to generate questions");
+      toast.error(e.message || "Failed to start interview");
     } finally {
       setLoading(false);
     }
   };
+
+  const switchMode = () => {
+    setMode(mode === "job-description" ? "custom-questions" : "job-description");
+    setJobText("");
+    setFile(null);
+  };
+
+  const isCustom = mode === "custom-questions";
 
   return (
     <div className="min-h-screen bg-background">
@@ -131,15 +196,49 @@ const Upload = () => {
       <div className="container py-12 max-w-2xl">
         <div className="text-center mb-10 animate-slide-up">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-primary text-xs font-mono mb-6">
-            <Sparkles className="w-3.5 h-3.5" />
-            AI-Powered Mock Interview
+            {isCustom ? <ListChecks className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
+            {isCustom ? "Custom Questions Mode" : "AI-Powered Mock Interview"}
           </div>
           <h1 className="text-3xl md:text-4xl font-bold font-display mb-3">
-            Upload <span className="text-gradient-primary">Job Description</span>
+            {isCustom ? (
+              <>Upload Your <span className="text-gradient-primary">Questions</span></>
+            ) : (
+              <>Upload <span className="text-gradient-primary">Job Description</span></>
+            )}
           </h1>
           <p className="text-muted-foreground text-sm max-w-md mx-auto">
-            Paste a job description or upload a file. Our AI will generate tailored interview questions for you to practice.
+            {isCustom
+              ? "Upload a file with your own questions or paste them below. The interview will use exactly those questions."
+              : "Paste a job description or upload a file. Our AI will generate tailored interview questions for you to practice."}
           </p>
+        </div>
+
+        {/* Mode toggle */}
+        <div className="flex justify-center mb-6 animate-slide-up">
+          <div className="inline-flex rounded-lg border border-border/60 bg-card p-1">
+            <button
+              onClick={() => { setMode("job-description"); setJobText(""); setFile(null); }}
+              className={`px-4 py-2 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${
+                !isCustom
+                  ? "bg-primary/10 text-primary border border-primary/30"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              AI Questions
+            </button>
+            <button
+              onClick={() => { setMode("custom-questions"); setJobText(""); setFile(null); }}
+              className={`px-4 py-2 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${
+                isCustom
+                  ? "bg-primary/10 text-primary border border-primary/30"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <ListChecks className="w-3.5 h-3.5" />
+              My Questions
+            </button>
+          </div>
         </div>
 
         <div className="space-y-6 animate-slide-up">
@@ -147,14 +246,21 @@ const Upload = () => {
           <div className="rounded-lg border border-border/60 bg-card p-5 space-y-3">
             <label className="text-sm font-medium text-card-foreground flex items-center gap-2">
               <FileText className="w-4 h-4 text-primary" />
-              Paste Job Description
+              {isCustom ? "Paste Your Questions" : "Paste Job Description"}
             </label>
             <Textarea
               value={jobText}
               onChange={(e) => setJobText(e.target.value)}
-              placeholder="Paste the full job description here..."
+              placeholder={isCustom
+                ? "1. What is your greatest strength?\n2. Describe a challenging project...\n3. How do you handle deadlines?"
+                : "Paste the full job description here..."}
               className="min-h-[200px] bg-secondary/40 border-border/40 text-sm font-mono resize-none"
             />
+            {isCustom && (
+              <p className="text-xs text-muted-foreground/60">
+                Tip: Use numbered lists, bullet points, or one question per line
+              </p>
+            )}
           </div>
 
           {/* Divider */}
@@ -198,35 +304,65 @@ const Upload = () => {
                   <span className="text-primary font-medium">.docx</span>, or{" "}
                   <span className="text-primary font-medium">.txt</span> file here
                 </p>
-                <p className="text-xs text-muted-foreground/60 mt-1">or click to browse</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">
+                  {isCustom ? "File should contain your questions" : "or click to browse"}
+                </p>
               </>
             )}
           </div>
 
-          {/* Interview Settings */}
+          {/* Interview Settings — only show full settings for AI mode */}
           <div className="rounded-lg border border-border/60 bg-card p-5 space-y-5">
             <label className="text-sm font-medium text-card-foreground flex items-center gap-2">
               <Settings2 className="w-4 h-4 text-primary" />
               Interview Settings
             </label>
 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label className="text-xs text-muted-foreground">Number of Questions</Label>
-                <span className="text-sm font-mono font-bold text-primary">{questionCount}</span>
-              </div>
-              <Slider
-                value={[questionCount]}
-                onValueChange={([v]) => setQuestionCount(v)}
-                min={3}
-                max={15}
-                step={1}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground/50">
-                <span>3</span><span>15</span>
-              </div>
-            </div>
+            {!isCustom && (
+              <>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-muted-foreground">Number of Questions</Label>
+                    <span className="text-sm font-mono font-bold text-primary">{questionCount}</span>
+                  </div>
+                  <Slider
+                    value={[questionCount]}
+                    onValueChange={([v]) => setQuestionCount(v)}
+                    min={3}
+                    max={15}
+                    step={1}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground/50">
+                    <span>3</span><span>15</span>
+                  </div>
+                </div>
+
+                {/* Difficulty */}
+                <div className="space-y-3">
+                  <Label className="text-xs text-muted-foreground">Difficulty Level</Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {(["easy", "medium", "hard"] as const).map((level) => (
+                      <button
+                        key={level}
+                        onClick={() => setDifficulty(level)}
+                        className={`py-2 px-3 rounded-md text-xs font-medium border transition-all capitalize ${
+                          difficulty === level
+                            ? level === "easy"
+                              ? "border-primary/50 bg-primary/10 text-primary"
+                              : level === "medium"
+                              ? "border-warning/50 bg-warning/10 text-warning"
+                              : "border-destructive/50 bg-destructive/10 text-destructive"
+                            : "border-border/60 bg-secondary/30 text-muted-foreground hover:border-border"
+                        }`}
+                      >
+                        {level}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -247,30 +383,6 @@ const Upload = () => {
                 <span>30s</span><span>5min</span>
               </div>
             </div>
-
-            {/* Difficulty */}
-            <div className="space-y-3">
-              <Label className="text-xs text-muted-foreground">Difficulty Level</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {(["easy", "medium", "hard"] as const).map((level) => (
-                  <button
-                    key={level}
-                    onClick={() => setDifficulty(level)}
-                    className={`py-2 px-3 rounded-md text-xs font-medium border transition-all capitalize ${
-                      difficulty === level
-                        ? level === "easy"
-                          ? "border-primary/50 bg-primary/10 text-primary"
-                          : level === "medium"
-                          ? "border-warning/50 bg-warning/10 text-warning"
-                          : "border-destructive/50 bg-destructive/10 text-destructive"
-                        : "border-border/60 bg-secondary/30 text-muted-foreground hover:border-border"
-                    }`}
-                  >
-                    {level}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Start button */}
@@ -282,12 +394,12 @@ const Upload = () => {
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Generating Questions...
+                {isCustom ? "Loading Questions..." : "Generating Questions..."}
               </>
             ) : (
               <>
-                <Sparkles className="w-4 h-4" />
-                Start Mock Interview
+                {isCustom ? <ListChecks className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+                {isCustom ? "Start with My Questions" : "Start Mock Interview"}
               </>
             )}
           </Button>

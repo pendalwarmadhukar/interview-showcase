@@ -50,6 +50,7 @@ const typeColors: Record<string, string> = {
   technical: "bg-accent/10 text-accent border-accent/30",
   behavioral: "bg-primary/10 text-primary border-primary/30",
   situational: "bg-warning/10 text-warning border-warning/30",
+  general: "bg-secondary/50 text-muted-foreground border-border/40",
 };
 
 const Interview = () => {
