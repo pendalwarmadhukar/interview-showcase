@@ -33,6 +33,13 @@ const Navbar = () => {
               <History className="w-4 h-4" />
               History
             </Link>
+            <Link
+              to="/dashboard"
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
+            >
+              <BarChart3 className="w-4 h-4" />
+              Dashboard
+            </Link>
           )}
           {user ? (
             <Button variant="ghost" size="sm" onClick={signOut} className="text-xs text-muted-foreground">
