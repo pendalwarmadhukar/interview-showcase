@@ -79,7 +79,7 @@ const Upload = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-questions", {
-        body: { jobDescription: description, questionCount },
+        body: { jobDescription: description, questionCount, difficulty },
       });
 
       if (error) throw error;
