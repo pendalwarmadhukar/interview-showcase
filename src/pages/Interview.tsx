@@ -372,15 +372,14 @@ const Interview = () => {
             <ChevronLeft className="w-4 h-4" /> Previous
           </Button>
 
-          {allAnswered ? (
-            <Button onClick={finishInterview} className="glow-primary">
+          {currentIndex === questions.length - 1 ? (
+            <Button onClick={finishInterview} className="glow-primary" disabled={!currentAnswer.submitted}>
               <Trophy className="w-4 h-4" /> View Results
             </Button>
           ) : (
             <Button
               variant="outline"
               onClick={() => { setCurrentIndex((p) => p + 1); setShowHint(false); }}
-              disabled={currentIndex === questions.length - 1}
             >
               Next <ChevronRight className="w-4 h-4" />
             </Button>
