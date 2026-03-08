@@ -36,6 +36,14 @@ const Navbar = () => {
             <BarChart3 className="w-4 h-4" />
             Dashboard
           </Link>
+          <Link
+            to="/profile"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
+          >
+            <UserCircle className="w-4 h-4" />
+            Profile
+          </Link>
         </>
       )}
       {user ? (

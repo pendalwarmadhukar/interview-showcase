@@ -38,6 +38,7 @@ const App = () => (
               <Route path="/shared/:id" element={<SharedResults />} />
               <Route path="/history" element={<ProtectedRoute><InterviewHistory /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
