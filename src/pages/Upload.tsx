@@ -176,10 +176,50 @@ const Upload = () => {
             )}
           </div>
 
-          {/* Note about PDF */}
-          <div className="flex items-start gap-2 text-xs text-muted-foreground/70">
-            <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-            <span>PDF text extraction is supported. For scanned PDFs or images, paste the text content directly.</span>
+          {/* Interview Settings */}
+          <div className="rounded-lg border border-border/60 bg-card p-5 space-y-5">
+            <label className="text-sm font-medium text-card-foreground flex items-center gap-2">
+              <Settings2 className="w-4 h-4 text-primary" />
+              Interview Settings
+            </label>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs text-muted-foreground">Number of Questions</Label>
+                <span className="text-sm font-mono font-bold text-primary">{questionCount}</span>
+              </div>
+              <Slider
+                value={[questionCount]}
+                onValueChange={([v]) => setQuestionCount(v)}
+                min={3}
+                max={15}
+                step={1}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground/50">
+                <span>3</span><span>15</span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs text-muted-foreground">Time per Question</Label>
+                <span className="text-sm font-mono font-bold text-primary">
+                  {timeLimit >= 60 ? `${Math.floor(timeLimit / 60)}m` : ""}{timeLimit % 60 > 0 ? ` ${timeLimit % 60}s` : ""}
+                </span>
+              </div>
+              <Slider
+                value={[timeLimit]}
+                onValueChange={([v]) => setTimeLimit(v)}
+                min={30}
+                max={300}
+                step={30}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground/50">
+                <span>30s</span><span>5min</span>
+              </div>
+            </div>
           </div>
 
           {/* Start button */}
