@@ -102,7 +102,31 @@ const Results = () => {
     }
   };
 
-  const downloadResults = () => {
+  const shareResults = async () => {
+    if (!user || !interviewId) {
+      toast.error("Please sign in and save your interview first");
+      return;
+    }
+    setSharing(true);
+    try {
+      const token = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+      const { error } = await supabase
+        .from("interviews")
+        .update({ share_token: token })
+        .eq("id", interviewId);
+      if (error) throw error;
+      const url = `${window.location.origin}/shared/${token}`;
+      setShareUrl(url);
+      await navigator.clipboard.writeText(url);
+      toast.success("Share link copied to clipboard!");
+    } catch (e: any) {
+      console.error("Share error:", e);
+      toast.error("Failed to create share link");
+    } finally {
+      setSharing(false);
+    }
+  };
+
     const jobDescription = sessionStorage.getItem("interview_data");
     const jd = jobDescription ? JSON.parse(jobDescription).jobDescription : "Unknown";
     const doc = new jsPDF();
