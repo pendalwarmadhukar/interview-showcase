@@ -272,6 +272,9 @@ const Results = () => {
           <Button variant="outline" className="flex-1" onClick={() => navigate("/upload")}>
             <RotateCcw className="w-4 h-4" /> Try Another
           </Button>
+          <Button variant="outline" className="flex-1" onClick={downloadResults}>
+            <Download className="w-4 h-4" /> Download
+          </Button>
           {user && (
             <Button variant="outline" className="flex-1" onClick={() => navigate("/history")}>
               View History
