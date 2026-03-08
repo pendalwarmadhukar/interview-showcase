@@ -59,6 +59,7 @@ const Navbar = () => {
           </Link>
         </>
       )}
+      <ThemeToggle />
       {user ? (
         <div className="flex items-center gap-2">
           <Link to="/profile" onClick={() => setMobileOpen(false)}>
