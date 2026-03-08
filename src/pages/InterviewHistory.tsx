@@ -83,9 +83,12 @@ const InterviewHistory = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
+        <SEOHead title="Interview History" description="Review your past mock interviews and track your improvement." />
         <Navbar />
-        <div className="container py-16 flex justify-center">
-          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        <div className="container py-12 max-w-3xl space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonCard key={i} lines={3} showAvatar />
+          ))}
         </div>
       </div>
     );
