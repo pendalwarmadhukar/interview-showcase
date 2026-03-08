@@ -14,7 +14,10 @@ import mammoth from "mammoth";
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
 
 const extractTextFromFile = async (file: File): Promise<string> => {
-  if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
+  const name = file.name.toLowerCase();
+
+  // PDF extraction
+  if (file.type === "application/pdf" || name.endsWith(".pdf")) {
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     let text = "";
@@ -26,6 +29,24 @@ const extractTextFromFile = async (file: File): Promise<string> => {
     if (!text.trim()) throw new Error("Could not extract text from this PDF. Please paste the content manually.");
     return text.trim();
   }
+
+  // DOCX extraction
+  if (
+    file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+    name.endsWith(".docx")
+  ) {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    if (!result.value.trim()) throw new Error("Could not extract text from this DOCX. Please paste the content manually.");
+    return result.value.trim();
+  }
+
+  // DOC warning
+  if (name.endsWith(".doc")) {
+    throw new Error("Legacy .doc format is not supported. Please save as .docx or paste the content manually.");
+  }
+
+  // Plain text fallback (txt, etc.)
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => resolve(e.target?.result as string);
