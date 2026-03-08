@@ -7,6 +7,7 @@ import { RotateCcw, Trophy, Target, TrendingUp, ChevronDown, ChevronUp, Save, Lo
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import jsPDF from "jspdf";
 
 interface ResultItem {
   question: {
