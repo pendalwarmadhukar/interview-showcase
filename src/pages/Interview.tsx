@@ -174,6 +174,28 @@ const Interview = () => {
           <span className="text-xs font-mono text-muted-foreground">
             Question {currentIndex + 1} of {questions.length}
           </span>
+
+          {/* Timer */}
+          {!currentAnswer.submitted && (
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-mono transition-all ${
+              timer.isCritical
+                ? "border-destructive/50 bg-destructive/10 text-destructive animate-pulse"
+                : timer.isLow
+                ? "border-warning/50 bg-warning/10 text-warning"
+                : "border-border/60 bg-secondary/50 text-muted-foreground"
+            }`}>
+              <Timer className="w-3.5 h-3.5" />
+              <span className="w-10 text-center">{timer.formatted}</span>
+              <button
+                onClick={() => timer.isRunning ? timer.pause() : timer.start()}
+                className="p-0.5 rounded hover:bg-background/50 transition-colors"
+                title={timer.isRunning ? "Pause timer" : "Resume timer"}
+              >
+                {timer.isRunning ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+              </button>
+            </div>
+          )}
+
           <Badge variant="outline" className={`text-xs ${typeColors[currentQuestion.type]}`}>
             {currentQuestion.type}
           </Badge>
