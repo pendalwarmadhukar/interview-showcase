@@ -175,7 +175,7 @@ const Upload = () => {
           {/* Note about PDF */}
           <div className="flex items-start gap-2 text-xs text-muted-foreground/70">
             <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-            <span>For best results with PDF files, paste the text content directly. Text files work perfectly.</span>
+            <span>PDF text extraction is supported. For scanned PDFs or images, paste the text content directly.</span>
           </div>
 
           {/* Start button */}
