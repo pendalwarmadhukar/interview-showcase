@@ -9,7 +9,12 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { jobDescription, questionCount = 5 } = await req.json();
+    const { jobDescription, questionCount = 5, difficulty = "medium" } = await req.json();
+    const difficultyGuide: Record<string, string> = {
+      easy: "Generate beginner-friendly questions. Focus on fundamentals, basic concepts, and common scenarios. Avoid complex system design or advanced topics.",
+      medium: "Generate intermediate questions. Include a mix of conceptual and practical questions that test solid working knowledge.",
+      hard: "Generate advanced, challenging questions. Include system design, edge cases, deep technical concepts, and complex problem-solving scenarios.",
+    };
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
