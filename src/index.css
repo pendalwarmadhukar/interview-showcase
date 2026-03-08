@@ -60,6 +60,56 @@
     --glow-primary: 0 0 20px hsl(145 80% 50% / 0.3);
     --glow-accent: 0 0 20px hsl(180 70% 45% / 0.3);
   }
+
+  .light {
+    --background: 0 0% 98%;
+    --foreground: 220 20% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 12%;
+
+    --primary: 145 80% 38%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 10% 93%;
+    --secondary-foreground: 220 15% 30%;
+
+    --muted: 220 10% 95%;
+    --muted-foreground: 220 10% 45%;
+
+    --accent: 180 70% 35%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 10% 88%;
+    --input: 220 10% 88%;
+    --ring: 145 80% 38%;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 20% 12%;
+    --sidebar-primary: 145 80% 38%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 10% 93%;
+    --sidebar-accent-foreground: 220 15% 30%;
+    --sidebar-border: 220 10% 88%;
+    --sidebar-ring: 145 80% 38%;
+
+    --warning: 45 90% 45%;
+    --warning-foreground: 0 0% 100%;
+    --success: 145 80% 38%;
+    --success-foreground: 0 0% 100%;
+    --easy: 145 80% 38%;
+    --medium: 45 90% 45%;
+    --hard: 0 70% 50%;
+
+    --glow-primary: 0 0 20px hsl(145 80% 38% / 0.15);
+    --glow-accent: 0 0 20px hsl(180 70% 35% / 0.15);
+  }
 }
 
 @layer base {
