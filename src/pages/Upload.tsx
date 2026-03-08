@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import * as pdfjsLib from "pdfjs-dist";
+import mammoth from "mammoth";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
 
