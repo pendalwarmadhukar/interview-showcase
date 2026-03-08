@@ -29,7 +29,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are a senior technical interviewer. Based on the job description provided, generate exactly ${questionCount} interview questions. Mix behavioral, technical, and situational questions relevant to the role. Return a JSON array of objects with "id" (number), "question" (string), "type" (one of "technical", "behavioral", "situational"), and "hint" (a brief hint string). Return ONLY valid JSON, no markdown.`,
+            content: `You are a senior technical interviewer. Based on the job description provided, generate exactly ${questionCount} interview questions. ${difficultyGuide[difficulty] || difficultyGuide.medium} Mix behavioral, technical, and situational questions relevant to the role. Return a JSON array of objects with "id" (number), "question" (string), "type" (one of "technical", "behavioral", "situational"), and "hint" (a brief hint string). Return ONLY valid JSON, no markdown.`,
           },
           {
             role: "user",

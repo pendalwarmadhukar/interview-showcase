@@ -221,6 +221,30 @@ const Upload = () => {
                 <span>30s</span><span>5min</span>
               </div>
             </div>
+
+            {/* Difficulty */}
+            <div className="space-y-3">
+              <Label className="text-xs text-muted-foreground">Difficulty Level</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {(["easy", "medium", "hard"] as const).map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => setDifficulty(level)}
+                    className={`py-2 px-3 rounded-md text-xs font-medium border transition-all capitalize ${
+                      difficulty === level
+                        ? level === "easy"
+                          ? "border-primary/50 bg-primary/10 text-primary"
+                          : level === "medium"
+                          ? "border-warning/50 bg-warning/10 text-warning"
+                          : "border-destructive/50 bg-destructive/10 text-destructive"
+                        : "border-border/60 bg-secondary/30 text-muted-foreground hover:border-border"
+                    }`}
+                  >
+                    {level}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Start button */}
