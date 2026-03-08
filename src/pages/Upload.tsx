@@ -39,6 +39,8 @@ const Upload = () => {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [questionCount, setQuestionCount] = useState(5);
+  const [timeLimit, setTimeLimit] = useState(120);
 
   const handleFileDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
