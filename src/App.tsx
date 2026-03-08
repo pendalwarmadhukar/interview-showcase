@@ -15,6 +15,7 @@ import ResetPassword from "./pages/ResetPassword";
 import SharedResults from "./pages/SharedResults";
 import InterviewHistory from "./pages/InterviewHistory";
 import Dashboard from "./pages/Dashboard";
+import ProfileSettings from "./pages/ProfileSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/shared/:id" element={<SharedResults />} />
               <Route path="/history" element={<ProtectedRoute><InterviewHistory /></ProtectedRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

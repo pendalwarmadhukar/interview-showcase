@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Terminal, Sparkles, History, LogIn, LogOut, BarChart3, Menu, X } from "lucide-react";
+import { Terminal, Sparkles, History, LogIn, LogOut, BarChart3, Menu, X, UserCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 
@@ -35,6 +35,14 @@ const Navbar = () => {
           >
             <BarChart3 className="w-4 h-4" />
             Dashboard
+          </Link>
+          <Link
+            to="/profile"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
+          >
+            <UserCircle className="w-4 h-4" />
+            Profile
           </Link>
         </>
       )}
