@@ -127,6 +127,7 @@ const Results = () => {
     }
   };
 
+  const downloadResults = () => {
     const jobDescription = sessionStorage.getItem("interview_data");
     const jd = jobDescription ? JSON.parse(jobDescription).jobDescription : "Unknown";
     const doc = new jsPDF();
