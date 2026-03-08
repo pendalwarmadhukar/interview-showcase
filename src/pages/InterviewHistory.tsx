@@ -61,16 +61,15 @@ const InterviewHistory = () => {
     if (interview?.answers) return;
 
     setLoadingAnswers(id);
-    const { data } = await supabase
-      .from("interview_answers")
-      .select("*")
-      .eq("interview_id", id)
-      .order("created_at", { ascending: true });
-
-    if (data) {
-      setInterviews((prev) =>
-        prev.map((i) => (i.id === id ? { ...i, answers: data as AnswerRecord[] } : i))
-      );
+    try {
+      const result = await mongodb.getAnswers(id);
+      if (result?.data) {
+        setInterviews((prev) =>
+          prev.map((i) => (i.id === id ? { ...i, answers: result.data as AnswerRecord[] } : i))
+        );
+      }
+    } catch (e) {
+      console.error("Fetch answers error:", e);
     }
     setLoadingAnswers(null);
   };
