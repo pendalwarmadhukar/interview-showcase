@@ -9,6 +9,8 @@ import Upload from "./pages/Upload";
 import Interview from "./pages/Interview";
 import Results from "./pages/Results";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
+import SharedResults from "./pages/SharedResults";
 import InterviewHistory from "./pages/InterviewHistory";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
