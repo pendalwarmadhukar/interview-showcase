@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trophy, Target, TrendingUp, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { mongodb } from "@/lib/mongodb";
 
 interface SharedAnswer {
   question_text: string;
