@@ -193,6 +193,7 @@ const Upload = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title={isCustom ? "Upload Questions" : "Upload Job Description"} description="Upload a job description or custom questions to start your AI-powered mock interview." />
       <Navbar />
       <div className="container py-12 max-w-2xl">
         <div className="text-center mb-10 animate-slide-up">

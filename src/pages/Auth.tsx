@@ -60,6 +60,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title={mode === "login" ? "Sign In" : mode === "signup" ? "Create Account" : "Reset Password"} description="Sign in or create your InterviewAI account to track progress and save interviews." />
       <Navbar />
       <div className="container py-16 max-w-sm">
         <div className="text-center mb-8 animate-slide-up">

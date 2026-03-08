@@ -158,6 +158,7 @@ const Interview = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title={`Question ${currentIndex + 1} of ${questions.length}`} description="Practice your interview answers with real-time AI feedback." />
       <Navbar />
       <div className="container py-8 max-w-3xl">
         {/* Progress */}

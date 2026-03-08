@@ -264,6 +264,11 @@ const ProfileSettings = () => {
             )}
           </Button>
         </div>
+
+        {/* Change Password */}
+        <div className="animate-slide-up">
+          <ChangePassword />
+        </div>
       </div>
     </div>
   );

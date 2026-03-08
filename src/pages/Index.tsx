@@ -31,6 +31,8 @@ const steps = [
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="AI Mock Interview Practice" description="Practice job interviews with AI-generated questions tailored to your job description. Get instant feedback and improve your interview skills." />
+      <OnboardingDialog />
       <Navbar />
 
       {/* Hero */}

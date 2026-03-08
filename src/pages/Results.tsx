@@ -199,6 +199,7 @@ const Results = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Interview Results" description="Review your mock interview scores, feedback, and areas for improvement." />
       <Navbar />
       <div className="container py-12 max-w-3xl">
         {/* Summary */}

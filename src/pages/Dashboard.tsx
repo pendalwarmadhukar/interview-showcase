@@ -131,11 +131,13 @@ const Dashboard = () => {
         </div>
 
         {isEmpty ? (
-          <div className="text-center py-20 rounded-lg border border-border/60 bg-card">
-            <Target className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground text-sm mb-4">Complete your first interview to see analytics</p>
-            <Button onClick={() => navigate("/upload")} variant="outline">Start Interview</Button>
-          </div>
+          <EmptyState
+            icon={Target}
+            title="No interviews yet"
+            description="Complete your first interview to see analytics and track your progress over time."
+            actionLabel="Start Interview"
+            onAction={() => navigate("/upload")}
+          />
         ) : (
           <>
             {/* Stats row */}

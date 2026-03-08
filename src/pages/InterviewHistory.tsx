@@ -115,13 +115,13 @@ const InterviewHistory = () => {
         </div>
 
         {interviews.length === 0 ? (
-          <div className="text-center py-16 rounded-lg border border-border/60 bg-card">
-            <Target className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground text-sm">No interviews yet. Start your first one!</p>
-            <Button onClick={() => navigate("/upload")} className="mt-4" variant="outline">
-              Start Interview
-            </Button>
-          </div>
+          <EmptyState
+            icon={Target}
+            title="No interviews yet"
+            description="Complete your first mock interview and it will appear here."
+            actionLabel="Start Interview"
+            onAction={() => navigate("/upload")}
+          />
         ) : (
           <div className="space-y-3">
             {interviews.map((interview) => (
