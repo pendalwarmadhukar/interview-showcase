@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RotateCcw, Trophy, Target, TrendingUp, ChevronDown, ChevronUp, Save, Loader2, Download } from "lucide-react";
+import { RotateCcw, Trophy, Target, TrendingUp, ChevronDown, ChevronUp, Save, Loader2, Download, Share2, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
