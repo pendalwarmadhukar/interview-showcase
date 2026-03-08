@@ -37,7 +37,6 @@ const SharedResults = () => {
     const fetchShared = async () => {
       try {
         const result = await mongodb.getShared(id!);
-        if (result.error) throw new Error(result.error);
         setData({
           job_description: result.interview.job_description,
           average_score: result.interview.average_score,
