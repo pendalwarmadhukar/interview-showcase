@@ -7,6 +7,7 @@ import { RotateCcw, Trophy, Target, TrendingUp, ChevronDown, ChevronUp, Save, Lo
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import jsPDF from "jspdf";
 
 interface ResultItem {
   question: {
@@ -100,52 +101,79 @@ const Results = () => {
   const downloadResults = () => {
     const jobDescription = sessionStorage.getItem("interview_data");
     const jd = jobDescription ? JSON.parse(jobDescription).jobDescription : "Unknown";
-    const lines: string[] = [
-      "═══════════════════════════════════════",
-      "       MOCK INTERVIEW RESULTS",
-      "═══════════════════════════════════════",
-      `Date: ${new Date().toLocaleDateString()}`,
-      `Job Description: ${jd.substring(0, 100)}...`,
-      `Average Score: ${avgScore.toFixed(1)}/10`,
-      `Strong Answers: ${results.filter((r) => (r.evaluation?.score || 0) >= 7).length}/${results.length}`,
-      "",
-    ];
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    const maxWidth = pageWidth - margin * 2;
+    let y = 20;
+
+    const addText = (text: string, size: number, color: [number, number, number] = [30, 30, 30], bold = false) => {
+      doc.setFontSize(size);
+      doc.setTextColor(...color);
+      doc.setFont("helvetica", bold ? "bold" : "normal");
+      const lines = doc.splitTextToSize(text, maxWidth);
+      if (y + lines.length * (size * 0.5) > doc.internal.pageSize.getHeight() - 20) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.text(lines, margin, y);
+      y += lines.length * (size * 0.45) + 2;
+    };
+
+    const addLine = () => {
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 6;
+    };
+
+    // Header
+    addText("Mock Interview Results", 22, [59, 130, 246], true);
+    y += 2;
+    addText(`Date: ${new Date().toLocaleDateString()}`, 10, [120, 120, 120]);
+    addText(`Average Score: ${avgScore.toFixed(1)}/10  |  Strong Answers: ${results.filter((r) => (r.evaluation?.score || 0) >= 7).length}/${results.length}`, 11, [80, 80, 80]);
+    y += 2;
+    addText(`Job: ${jd.substring(0, 150)}${jd.length > 150 ? "..." : ""}`, 9, [140, 140, 140]);
+    y += 4;
+    addLine();
 
     results.forEach((r, i) => {
-      lines.push(`───────────────────────────────────────`);
-      lines.push(`Q${i + 1}. [${r.question.type.toUpperCase()}] ${r.question.question}`);
-      lines.push(`Score: ${r.evaluation?.score || 0}/10`);
-      lines.push("");
-      lines.push(`Your Answer:`);
-      lines.push(r.answer);
-      lines.push("");
+      const score = r.evaluation?.score || 0;
+      const scoreColor: [number, number, number] = score >= 7 ? [34, 197, 94] : score >= 5 ? [234, 179, 8] : [239, 68, 68];
+
+      addText(`Q${i + 1}. ${r.question.question}`, 12, [30, 30, 30], true);
+      addText(`[${r.question.type.toUpperCase()}]  Score: ${score}/10`, 10, scoreColor, true);
+      y += 2;
+
+      addText("Your Answer:", 9, [100, 100, 100], true);
+      addText(r.answer, 10, [60, 60, 60]);
+      y += 2;
+
       if (r.evaluation) {
-        lines.push(`Feedback: ${r.evaluation.overallFeedback}`);
-        lines.push("");
+        addText("Feedback:", 9, [59, 130, 246], true);
+        addText(r.evaluation.overallFeedback, 10, [60, 60, 60]);
+        y += 1;
+
         if (r.evaluation.strengths.length > 0) {
-          lines.push("Strengths:");
-          r.evaluation.strengths.forEach((s) => lines.push(`  ✓ ${s}`));
-          lines.push("");
+          addText("Strengths:", 9, [34, 197, 94], true);
+          r.evaluation.strengths.forEach((s) => addText(`  ✓ ${s}`, 9, [60, 60, 60]));
+          y += 1;
         }
+
         if (r.evaluation.improvements.length > 0) {
-          lines.push("Areas to Improve:");
-          r.evaluation.improvements.forEach((s) => lines.push(`  • ${s}`));
-          lines.push("");
+          addText("Areas to Improve:", 9, [234, 179, 8], true);
+          r.evaluation.improvements.forEach((s) => addText(`  • ${s}`, 9, [60, 60, 60]));
+          y += 1;
         }
-        lines.push(`Suggested Answer:`);
-        lines.push(r.evaluation.suggestedAnswer);
+
+        addText("Suggested Answer:", 9, [139, 92, 246], true);
+        addText(r.evaluation.suggestedAnswer, 9, [80, 80, 80]);
       }
-      lines.push("");
+      y += 4;
+      addLine();
     });
 
-    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `interview-results-${new Date().toISOString().slice(0, 10)}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Results downloaded!");
+    doc.save(`interview-results-${new Date().toISOString().slice(0, 10)}.pdf`);
+    toast.success("PDF downloaded!");
   };
 
   const avgScore =
