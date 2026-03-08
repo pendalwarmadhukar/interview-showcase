@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RotateCcw, Trophy, Target, TrendingUp, ChevronDown, ChevronUp, Save, Loader2 } from "lucide-react";
+import { RotateCcw, Trophy, Target, TrendingUp, ChevronDown, ChevronUp, Save, Loader2, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -95,6 +95,57 @@ const Results = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const downloadResults = () => {
+    const jobDescription = sessionStorage.getItem("interview_data");
+    const jd = jobDescription ? JSON.parse(jobDescription).jobDescription : "Unknown";
+    const lines: string[] = [
+      "═══════════════════════════════════════",
+      "       MOCK INTERVIEW RESULTS",
+      "═══════════════════════════════════════",
+      `Date: ${new Date().toLocaleDateString()}`,
+      `Job Description: ${jd.substring(0, 100)}...`,
+      `Average Score: ${avgScore.toFixed(1)}/10`,
+      `Strong Answers: ${results.filter((r) => (r.evaluation?.score || 0) >= 7).length}/${results.length}`,
+      "",
+    ];
+
+    results.forEach((r, i) => {
+      lines.push(`───────────────────────────────────────`);
+      lines.push(`Q${i + 1}. [${r.question.type.toUpperCase()}] ${r.question.question}`);
+      lines.push(`Score: ${r.evaluation?.score || 0}/10`);
+      lines.push("");
+      lines.push(`Your Answer:`);
+      lines.push(r.answer);
+      lines.push("");
+      if (r.evaluation) {
+        lines.push(`Feedback: ${r.evaluation.overallFeedback}`);
+        lines.push("");
+        if (r.evaluation.strengths.length > 0) {
+          lines.push("Strengths:");
+          r.evaluation.strengths.forEach((s) => lines.push(`  ✓ ${s}`));
+          lines.push("");
+        }
+        if (r.evaluation.improvements.length > 0) {
+          lines.push("Areas to Improve:");
+          r.evaluation.improvements.forEach((s) => lines.push(`  • ${s}`));
+          lines.push("");
+        }
+        lines.push(`Suggested Answer:`);
+        lines.push(r.evaluation.suggestedAnswer);
+      }
+      lines.push("");
+    });
+
+    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `interview-results-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Results downloaded!");
   };
 
   const avgScore =
@@ -220,6 +271,9 @@ const Results = () => {
         <div className="flex gap-3 mt-8">
           <Button variant="outline" className="flex-1" onClick={() => navigate("/upload")}>
             <RotateCcw className="w-4 h-4" /> Try Another
+          </Button>
+          <Button variant="outline" className="flex-1" onClick={downloadResults}>
+            <Download className="w-4 h-4" /> Download
           </Button>
           {user && (
             <Button variant="outline" className="flex-1" onClick={() => navigate("/history")}>
