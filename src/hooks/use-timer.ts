@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
-const QUESTION_TIME_LIMIT = 120; // 2 minutes per question
+const DEFAULT_TIME_LIMIT = 120;
 
-export function useTimer(onTimeUp?: () => void) {
-  const [secondsLeft, setSecondsLeft] = useState(QUESTION_TIME_LIMIT);
+export function useTimer(timeLimit: number = DEFAULT_TIME_LIMIT, onTimeUp?: () => void) {
+  const [secondsLeft, setSecondsLeft] = useState(timeLimit);
   const [isRunning, setIsRunning] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const callbackRef = useRef(onTimeUp);
+  const timeLimitRef = useRef(timeLimit);
   callbackRef.current = onTimeUp;
+  timeLimitRef.current = timeLimit;
 
   const start = useCallback(() => {
     setIsRunning(true);
@@ -18,12 +20,12 @@ export function useTimer(onTimeUp?: () => void) {
   }, []);
 
   const reset = useCallback(() => {
-    setSecondsLeft(QUESTION_TIME_LIMIT);
+    setSecondsLeft(timeLimitRef.current);
     setIsRunning(false);
   }, []);
 
   const restart = useCallback(() => {
-    setSecondsLeft(QUESTION_TIME_LIMIT);
+    setSecondsLeft(timeLimitRef.current);
     setIsRunning(true);
   }, []);
 
@@ -50,7 +52,7 @@ export function useTimer(onTimeUp?: () => void) {
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
   const formatted = `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  const progress = secondsLeft / QUESTION_TIME_LIMIT;
+  const progress = secondsLeft / timeLimitRef.current;
   const isLow = secondsLeft <= 30;
   const isCritical = secondsLeft <= 10;
 

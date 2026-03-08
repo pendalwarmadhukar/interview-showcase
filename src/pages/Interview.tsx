@@ -67,7 +67,8 @@ const Interview = () => {
   const handleTimeUp = useCallback(() => {
     toast.warning("Time's up! Submit your answer now.");
   }, []);
-  const timer = useTimer(handleTimeUp);
+
+  const [timeLimit, setTimeLimit] = useState(120);
 
   useEffect(() => {
     const raw = sessionStorage.getItem("interview_data");
@@ -78,7 +79,10 @@ const Interview = () => {
     const data = JSON.parse(raw);
     setQuestions(data.questions);
     setJobDescription(data.jobDescription);
+    if (data.timeLimit) setTimeLimit(data.timeLimit);
   }, [navigate]);
+
+  const timer = useTimer(timeLimit, handleTimeUp);
 
   // Auto-speak question and reset timer when question changes
   useEffect(() => {
