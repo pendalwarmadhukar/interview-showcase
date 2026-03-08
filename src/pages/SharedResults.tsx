@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trophy, Target, TrendingUp, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { mongodb } from "@/lib/mongodb";
 
 interface SharedAnswer {
   question_text: string;
@@ -36,12 +36,15 @@ const SharedResults = () => {
   useEffect(() => {
     const fetchShared = async () => {
       try {
-        const { data: result, error: fnError } = await supabase.functions.invoke("get-shared-results", {
-          body: { interviewId: id },
-        });
-        if (fnError) throw fnError;
+        const result = await mongodb.getShared(id!);
         if (result.error) throw new Error(result.error);
-        setData(result.interview);
+        setData({
+          job_description: result.interview.job_description,
+          average_score: result.interview.average_score,
+          total_questions: result.interview.total_questions,
+          completed_at: result.interview.completed_at,
+          answers: result.answers,
+        });
       } catch (e: any) {
         setError(e.message || "Failed to load shared results");
       } finally {

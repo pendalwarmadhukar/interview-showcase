@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RotateCcw, Trophy, Target, TrendingUp, ChevronDown, ChevronUp, Save, Loader2, Download, Share2, Check } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { mongodb } from "@/lib/mongodb";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
@@ -62,23 +62,7 @@ const Results = () => {
       const jd = jobDescription ? JSON.parse(jobDescription).jobDescription : "Unknown";
       const avgScore = results.reduce((sum, r) => sum + (r.evaluation?.score || 0), 0) / results.length;
 
-      const { data: interview, error: intError } = await supabase
-        .from("interviews")
-        .insert({
-          user_id: user.id,
-          job_description: jd,
-          average_score: parseFloat(avgScore.toFixed(2)),
-          total_questions: results.length,
-        })
-        .select("id")
-        .single();
-
-      if (intError) throw intError;
-      setInterviewId(interview.id);
-
       const answers = results.map((r) => ({
-        interview_id: interview.id,
-        user_id: user.id,
         question_text: r.question.question,
         question_type: r.question.type,
         answer_text: r.answer,
@@ -89,9 +73,14 @@ const Results = () => {
         overall_feedback: r.evaluation?.overallFeedback || null,
       }));
 
-      const { error: ansError } = await supabase.from("interview_answers").insert(answers);
-      if (ansError) throw ansError;
+      const result = await mongodb.saveInterview({
+        job_description: jd,
+        average_score: parseFloat(avgScore.toFixed(2)),
+        total_questions: results.length,
+        answers,
+      });
 
+      setInterviewId(result.id);
       setSaved(true);
       toast.success("Interview saved to your history!");
     } catch (e: any) {
@@ -109,13 +98,8 @@ const Results = () => {
     }
     setSharing(true);
     try {
-      const token = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
-      const { error } = await supabase
-        .from("interviews")
-        .update({ share_token: token })
-        .eq("id", interviewId);
-      if (error) throw error;
-      const url = `${window.location.origin}/shared/${token}`;
+      const result = await mongodb.shareInterview(interviewId);
+      const url = `${window.location.origin}/shared/${result.token}`;
       setShareUrl(url);
       await navigator.clipboard.writeText(url);
       toast.success("Share link copied to clipboard!");

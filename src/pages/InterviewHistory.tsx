@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
-import { supabase } from "@/integrations/supabase/client";
+import { mongodb } from "@/lib/mongodb";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,11 +39,12 @@ const InterviewHistory = () => {
   useEffect(() => {
     if (!user) return;
     const fetchInterviews = async () => {
-      const { data, error } = await supabase
-        .from("interviews")
-        .select("*")
-        .order("completed_at", { ascending: false });
-      if (!error && data) setInterviews(data as InterviewRecord[]);
+      try {
+        const result = await mongodb.getInterviews();
+        if (result?.data) setInterviews(result.data as InterviewRecord[]);
+      } catch (e) {
+        console.error("Fetch interviews error:", e);
+      }
       setLoading(false);
     };
     fetchInterviews();
@@ -60,16 +61,15 @@ const InterviewHistory = () => {
     if (interview?.answers) return;
 
     setLoadingAnswers(id);
-    const { data } = await supabase
-      .from("interview_answers")
-      .select("*")
-      .eq("interview_id", id)
-      .order("created_at", { ascending: true });
-
-    if (data) {
-      setInterviews((prev) =>
-        prev.map((i) => (i.id === id ? { ...i, answers: data as AnswerRecord[] } : i))
-      );
+    try {
+      const result = await mongodb.getAnswers(id);
+      if (result?.data) {
+        setInterviews((prev) =>
+          prev.map((i) => (i.id === id ? { ...i, answers: result.data as AnswerRecord[] } : i))
+        );
+      }
+    } catch (e) {
+      console.error("Fetch answers error:", e);
     }
     setLoadingAnswers(null);
   };

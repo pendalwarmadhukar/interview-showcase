@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
-import { supabase } from "@/integrations/supabase/client";
+import { mongodb } from "@/lib/mongodb";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,12 +39,13 @@ const Dashboard = () => {
     }
 
     const fetchData = async () => {
-      const [intRes, ansRes] = await Promise.all([
-        supabase.from("interviews").select("id, average_score, total_questions, completed_at").order("completed_at", { ascending: true }),
-        supabase.from("interview_answers").select("question_type, score"),
-      ]);
-      if (intRes.data) setInterviews(intRes.data as InterviewData[]);
-      if (ansRes.data) setAnswers(ansRes.data as AnswerData[]);
+      try {
+        const result = await mongodb.getDashboard();
+        if (result?.interviews) setInterviews(result.interviews as InterviewData[]);
+        if (result?.answers) setAnswers(result.answers as AnswerData[]);
+      } catch (e) {
+        console.error("Dashboard fetch error:", e);
+      }
       setLoading(false);
     };
     fetchData();
