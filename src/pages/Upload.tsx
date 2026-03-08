@@ -6,25 +6,30 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import * as pdfjsLib from "pdfjs-dist";
 
-const Upload = () => {
-  const navigate = useNavigate();
-  const [jobText, setJobText] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [dragOver, setDragOver] = useState(false);
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
 
-  const extractTextFromFile = async (file: File): Promise<string> => {
-    if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
-      throw new Error("PDF files cannot be read directly. Please copy and paste the text content from your PDF instead.");
+const extractTextFromFile = async (file: File): Promise<string> => {
+  if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let text = "";
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      text += content.items.map((item: any) => item.str).join(" ") + "\n";
     }
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target?.result as string);
-      reader.onerror = reject;
-      reader.readAsText(file);
-    });
-  };
+    if (!text.trim()) throw new Error("Could not extract text from this PDF. Please paste the content manually.");
+    return text.trim();
+  }
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target?.result as string);
+    reader.onerror = reject;
+    reader.readAsText(file);
+  });
+};
 
   const handleFileDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
