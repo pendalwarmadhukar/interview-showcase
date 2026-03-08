@@ -15,6 +15,9 @@ const Upload = () => {
   const [dragOver, setDragOver] = useState(false);
 
   const extractTextFromFile = async (file: File): Promise<string> => {
+    if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
+      throw new Error("PDF files cannot be read directly. Please copy and paste the text content from your PDF instead.");
+    }
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => resolve(e.target?.result as string);
