@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Terminal, Code2, Zap } from "lucide-react";
+import { Terminal, Sparkles } from "lucide-react";
 
 const Navbar = () => {
   return (
@@ -10,23 +10,16 @@ const Navbar = () => {
             <Terminal className="w-5 h-5 text-primary" />
           </div>
           <span className="font-display font-bold text-lg text-foreground">
-            Code<span className="text-primary">Forge</span>
+            Interview<span className="text-primary">AI</span>
           </span>
         </Link>
-        <div className="flex items-center gap-6">
-          <Link
-            to="/problems"
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
-          >
-            <Code2 className="w-4 h-4" />
-            Problems
-          </Link>
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground font-medium">
-            <Zap className="w-4 h-4" />
-            <span className="font-mono text-primary">4</span>
-            <span>/10 solved</span>
-          </div>
-        </div>
+        <Link
+          to="/upload"
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
+        >
+          <Sparkles className="w-4 h-4" />
+          New Interview
+        </Link>
       </div>
     </nav>
   );

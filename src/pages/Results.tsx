@@ -1,0 +1,149 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Navbar from "@/components/Navbar";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { RotateCcw, Trophy, Target, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
+
+interface ResultItem {
+  question: {
+    id: number;
+    question: string;
+    type: string;
+    hint: string;
+  };
+  answer: string;
+  evaluation: {
+    score: number;
+    strengths: string[];
+    improvements: string[];
+    suggestedAnswer: string;
+    overallFeedback: string;
+  } | null;
+}
+
+const Results = () => {
+  const navigate = useNavigate();
+  const [results, setResults] = useState<ResultItem[]>([]);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const raw = sessionStorage.getItem("interview_results");
+    if (!raw) {
+      navigate("/");
+      return;
+    }
+    setResults(JSON.parse(raw));
+  }, [navigate]);
+
+  const avgScore =
+    results.length > 0
+      ? results.reduce((sum, r) => sum + (r.evaluation?.score || 0), 0) / results.length
+      : 0;
+
+  const scoreColor = avgScore >= 7 ? "text-primary" : avgScore >= 5 ? "text-warning" : "text-destructive";
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <div className="container py-12 max-w-3xl">
+        {/* Summary */}
+        <div className="text-center mb-10 animate-slide-up">
+          <Trophy className="w-12 h-12 text-primary mx-auto mb-4" />
+          <h1 className="text-3xl font-bold font-display mb-2">Interview Complete</h1>
+          <p className="text-muted-foreground text-sm">Here's how you performed</p>
+        </div>
+
+        {/* Score cards */}
+        <div className="grid grid-cols-3 gap-4 mb-8 animate-slide-up">
+          <div className="rounded-lg border border-border/60 bg-card p-4 text-center border-glow">
+            <Target className="w-5 h-5 text-primary mx-auto mb-2" />
+            <p className={`font-mono text-2xl font-bold ${scoreColor}`}>
+              {avgScore.toFixed(1)}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">Avg Score</p>
+          </div>
+          <div className="rounded-lg border border-border/60 bg-card p-4 text-center">
+            <TrendingUp className="w-5 h-5 text-accent mx-auto mb-2" />
+            <p className="font-mono text-2xl font-bold text-accent">
+              {results.filter((r) => (r.evaluation?.score || 0) >= 7).length}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">Strong Answers</p>
+          </div>
+          <div className="rounded-lg border border-border/60 bg-card p-4 text-center">
+            <Trophy className="w-5 h-5 text-warning mx-auto mb-2" />
+            <p className="font-mono text-2xl font-bold text-warning">
+              {results.length}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">Completed</p>
+          </div>
+        </div>
+
+        {/* Question breakdown */}
+        <div className="space-y-3 animate-slide-up">
+          {results.map((r, i) => (
+            <div key={i} className="rounded-lg border border-border/60 bg-card overflow-hidden">
+              <button
+                onClick={() => setExpandedIndex(expandedIndex === i ? null : i)}
+                className="w-full p-4 flex items-center gap-3 hover:bg-secondary/30 transition-colors text-left"
+              >
+                <div
+                  className={`w-10 h-10 rounded-md flex items-center justify-center font-mono font-bold text-sm ${
+                    (r.evaluation?.score || 0) >= 7
+                      ? "bg-primary/10 text-primary"
+                      : (r.evaluation?.score || 0) >= 5
+                      ? "bg-warning/10 text-warning"
+                      : "bg-destructive/10 text-destructive"
+                  }`}
+                >
+                  {r.evaluation?.score || 0}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-card-foreground truncate">
+                    {r.question.question}
+                  </p>
+                  <Badge variant="outline" className="text-xs mt-1">
+                    {r.question.type}
+                  </Badge>
+                </div>
+                {expandedIndex === i ? (
+                  <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
+                )}
+              </button>
+
+              {expandedIndex === i && r.evaluation && (
+                <div className="px-4 pb-4 space-y-3 border-t border-border/40 pt-3">
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Your Answer</p>
+                    <p className="text-sm text-card-foreground/80">{r.answer}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-primary mb-1">Feedback</p>
+                    <p className="text-sm text-card-foreground/80">{r.evaluation.overallFeedback}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-accent mb-1">Suggested Answer</p>
+                    <p className="text-sm text-card-foreground/70 leading-relaxed">
+                      {r.evaluation.suggestedAnswer}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-3 mt-8">
+          <Button variant="outline" className="flex-1" onClick={() => navigate("/")}>
+            <RotateCcw className="w-4 h-4" /> Try Another
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Results;

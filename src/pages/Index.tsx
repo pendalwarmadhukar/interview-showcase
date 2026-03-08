@@ -1,15 +1,30 @@
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
-import { questions } from "@/data/questions";
-import { Code2, Terminal, Braces, ArrowRight, Zap } from "lucide-react";
+import { Sparkles, FileText, MessageSquare, Trophy, ArrowRight } from "lucide-react";
 
-const stats = {
-  total: questions.length,
-  solved: questions.filter((q) => q.solved).length,
-  easy: questions.filter((q) => q.difficulty === "Easy").length,
-  medium: questions.filter((q) => q.difficulty === "Medium").length,
-  hard: questions.filter((q) => q.difficulty === "Hard").length,
-};
+const steps = [
+  {
+    icon: FileText,
+    title: "Upload Job Description",
+    description: "Paste or upload a job description PDF/text file",
+    color: "text-primary",
+    bg: "bg-primary/10",
+  },
+  {
+    icon: MessageSquare,
+    title: "Answer Questions",
+    description: "AI generates tailored interview questions for you",
+    color: "text-accent",
+    bg: "bg-accent/10",
+  },
+  {
+    icon: Trophy,
+    title: "Get Feedback",
+    description: "Receive detailed scoring and improvement tips",
+    color: "text-warning",
+    bg: "bg-warning/10",
+  },
+];
 
 const Index = () => {
   return (
@@ -19,65 +34,54 @@ const Index = () => {
       {/* Hero */}
       <section className="container py-20 lg:py-32 max-w-4xl text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-primary text-xs font-mono mb-8 animate-slide-up">
-          <Zap className="w-3.5 h-3.5" />
-          {stats.total} problems • {stats.solved} solved
+          <Sparkles className="w-3.5 h-3.5" />
+          AI-Powered Mock Interviews
         </div>
 
         <h1 className="text-4xl md:text-6xl font-bold font-display leading-tight mb-6 animate-slide-up">
-          Master the
+          Ace Your Next
           <br />
-          <span className="text-gradient-primary">Technical Interview</span>
+          <span className="text-gradient-primary">Job Interview</span>
         </h1>
 
         <p className="text-muted-foreground text-lg max-w-xl mx-auto mb-10 animate-slide-up">
-          Practice coding problems, sharpen your algorithms, and land your dream
-          job. One problem at a time.
+          Upload a job description, practice with AI-generated questions, and get instant feedback on your answers.
         </p>
 
         <Link
-          to="/problems"
+          to="/upload"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-all glow-primary animate-slide-up"
         >
-          Start Practicing
+          Start Mock Interview
           <ArrowRight className="w-4 h-4" />
         </Link>
       </section>
 
-      {/* Stats cards */}
+      {/* How it works */}
       <section className="container max-w-4xl pb-20">
+        <h2 className="text-center text-sm font-mono text-muted-foreground mb-8 uppercase tracking-wider">
+          How it works
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="rounded-lg border border-border/60 bg-card p-5 border-glow">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-md bg-easy/10">
-                <Terminal className="w-4 h-4 text-easy" />
+          {steps.map((step, i) => (
+            <div
+              key={i}
+              className="rounded-lg border border-border/60 bg-card p-5 border-glow"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className={`p-2 rounded-md ${step.bg}`}>
+                  <step.icon className={`w-4 h-4 ${step.color}`} />
+                </div>
+                <span className="font-mono text-xs text-muted-foreground">
+                  Step {i + 1}
+                </span>
               </div>
-              <span className="text-sm font-medium text-card-foreground">Easy</span>
+              <p className="text-sm font-medium text-card-foreground mb-1">
+                {step.title}
+              </p>
+              <p className="text-xs text-muted-foreground">{step.description}</p>
             </div>
-            <p className="font-mono text-2xl font-bold text-easy">{stats.easy}</p>
-            <p className="text-xs text-muted-foreground mt-1">problems</p>
-          </div>
-
-          <div className="rounded-lg border border-border/60 bg-card p-5 border-glow">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-md bg-medium/10">
-                <Code2 className="w-4 h-4 text-medium" />
-              </div>
-              <span className="text-sm font-medium text-card-foreground">Medium</span>
-            </div>
-            <p className="font-mono text-2xl font-bold text-medium">{stats.medium}</p>
-            <p className="text-xs text-muted-foreground mt-1">problems</p>
-          </div>
-
-          <div className="rounded-lg border border-border/60 bg-card p-5 border-glow">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-md bg-hard/10">
-                <Braces className="w-4 h-4 text-hard" />
-              </div>
-              <span className="text-sm font-medium text-card-foreground">Hard</span>
-            </div>
-            <p className="font-mono text-2xl font-bold text-hard">{stats.hard}</p>
-            <p className="text-xs text-muted-foreground mt-1">problems</p>
-          </div>
+          ))}
         </div>
       </section>
     </div>
