@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RotateCcw, Trophy, Target, TrendingUp, ChevronDown, ChevronUp } from "lucide-react";
+import { RotateCcw, Trophy, Target, TrendingUp, ChevronDown, ChevronUp, Save, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface ResultItem {
   question: {
@@ -24,8 +27,11 @@ interface ResultItem {
 
 const Results = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [results, setResults] = useState<ResultItem[]>([]);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     const raw = sessionStorage.getItem("interview_results");
@@ -35,6 +41,61 @@ const Results = () => {
     }
     setResults(JSON.parse(raw));
   }, [navigate]);
+
+  // Auto-save when user is logged in
+  useEffect(() => {
+    if (user && results.length > 0 && !saved) {
+      saveToDatabase();
+    }
+  }, [user, results]);
+
+  const saveToDatabase = async () => {
+    if (!user || saved || saving) return;
+    setSaving(true);
+
+    try {
+      const jobDescription = sessionStorage.getItem("interview_data");
+      const jd = jobDescription ? JSON.parse(jobDescription).jobDescription : "Unknown";
+      const avgScore = results.reduce((sum, r) => sum + (r.evaluation?.score || 0), 0) / results.length;
+
+      const { data: interview, error: intError } = await supabase
+        .from("interviews")
+        .insert({
+          user_id: user.id,
+          job_description: jd,
+          average_score: parseFloat(avgScore.toFixed(2)),
+          total_questions: results.length,
+        })
+        .select("id")
+        .single();
+
+      if (intError) throw intError;
+
+      const answers = results.map((r) => ({
+        interview_id: interview.id,
+        user_id: user.id,
+        question_text: r.question.question,
+        question_type: r.question.type,
+        answer_text: r.answer,
+        score: r.evaluation?.score || null,
+        strengths: r.evaluation?.strengths || [],
+        improvements: r.evaluation?.improvements || [],
+        suggested_answer: r.evaluation?.suggestedAnswer || null,
+        overall_feedback: r.evaluation?.overallFeedback || null,
+      }));
+
+      const { error: ansError } = await supabase.from("interview_answers").insert(answers);
+      if (ansError) throw ansError;
+
+      setSaved(true);
+      toast.success("Interview saved to your history!");
+    } catch (e: any) {
+      console.error("Save error:", e);
+      toast.error("Failed to save interview");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const avgScore =
     results.length > 0
@@ -78,6 +139,26 @@ const Results = () => {
             <p className="text-xs text-muted-foreground mt-1">Completed</p>
           </div>
         </div>
+
+        {/* Save status */}
+        {user && (
+          <div className={`text-center text-xs mb-4 ${saved ? "text-primary" : "text-muted-foreground"}`}>
+            {saving ? (
+              <span className="flex items-center justify-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Saving...</span>
+            ) : saved ? (
+              <span className="flex items-center justify-center gap-1"><Save className="w-3 h-3" /> Saved to history</span>
+            ) : null}
+          </div>
+        )}
+
+        {!user && (
+          <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 mb-6 text-center">
+            <p className="text-xs text-muted-foreground">
+              <button onClick={() => navigate("/auth")} className="text-primary font-medium hover:underline">Sign in</button>
+              {" "}to save this interview to your history
+            </p>
+          </div>
+        )}
 
         {/* Question breakdown */}
         <div className="space-y-3 animate-slide-up">
@@ -137,9 +218,14 @@ const Results = () => {
 
         {/* Actions */}
         <div className="flex gap-3 mt-8">
-          <Button variant="outline" className="flex-1" onClick={() => navigate("/")}>
+          <Button variant="outline" className="flex-1" onClick={() => navigate("/upload")}>
             <RotateCcw className="w-4 h-4" /> Try Another
           </Button>
+          {user && (
+            <Button variant="outline" className="flex-1" onClick={() => navigate("/history")}>
+              View History
+            </Button>
+          )}
         </div>
       </div>
     </div>
