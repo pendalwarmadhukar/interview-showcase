@@ -15,6 +15,7 @@ import ResetPassword from "./pages/ResetPassword";
 import SharedResults from "./pages/SharedResults";
 import InterviewHistory from "./pages/InterviewHistory";
 import Dashboard from "./pages/Dashboard";
+import ProfileSettings from "./pages/ProfileSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
