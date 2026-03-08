@@ -373,8 +373,8 @@ const Interview = () => {
           </Button>
 
           {currentIndex === questions.length - 1 ? (
-            <Button onClick={finishInterview} className="glow-primary" disabled={!currentAnswer.submitted}>
-              <Trophy className="w-4 h-4" /> View Results
+            <Button onClick={finishInterview} className="glow-primary" disabled={!allAnswered}>
+              <Trophy className="w-4 h-4" /> View Results {!allAnswered && `(${Object.values(answers).filter(a => a.submitted).length}/${questions.length})`}
             </Button>
           ) : (
             <Button
