@@ -39,10 +39,9 @@ serve(async (req) => {
       const supabase = createClient(supabaseUrl, supabaseAnonKey, {
         global: { headers: { Authorization: authHeader } },
       });
-      const token = authHeader.replace("Bearer ", "");
-      const { data: claimsData, error } = await supabase.auth.getClaims(token);
-      if (!error && claimsData?.claims) {
-        userId = claimsData.claims.sub;
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (!error && user) {
+        userId = user.id;
       }
     }
 
