@@ -14,7 +14,113 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      interview_answers: {
+        Row: {
+          answer_text: string
+          created_at: string
+          id: string
+          improvements: string[] | null
+          interview_id: string
+          overall_feedback: string | null
+          question_text: string
+          question_type: string
+          score: number | null
+          strengths: string[] | null
+          suggested_answer: string | null
+          user_id: string
+        }
+        Insert: {
+          answer_text: string
+          created_at?: string
+          id?: string
+          improvements?: string[] | null
+          interview_id: string
+          overall_feedback?: string | null
+          question_text: string
+          question_type: string
+          score?: number | null
+          strengths?: string[] | null
+          suggested_answer?: string | null
+          user_id: string
+        }
+        Update: {
+          answer_text?: string
+          created_at?: string
+          id?: string
+          improvements?: string[] | null
+          interview_id?: string
+          overall_feedback?: string | null
+          question_text?: string
+          question_type?: string
+          score?: number | null
+          strengths?: string[] | null
+          suggested_answer?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_answers_interview_id_fkey"
+            columns: ["interview_id"]
+            isOneToOne: false
+            referencedRelation: "interviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interviews: {
+        Row: {
+          average_score: number | null
+          completed_at: string
+          created_at: string
+          id: string
+          job_description: string
+          total_questions: number
+          user_id: string
+        }
+        Insert: {
+          average_score?: number | null
+          completed_at?: string
+          created_at?: string
+          id?: string
+          job_description: string
+          total_questions?: number
+          user_id: string
+        }
+        Update: {
+          average_score?: number | null
+          completed_at?: string
+          created_at?: string
+          id?: string
+          job_description?: string
+          total_questions?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
