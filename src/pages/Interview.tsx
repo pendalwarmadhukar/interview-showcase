@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -16,8 +16,12 @@ import {
   VolumeX,
   Mic,
   MicOff,
+  Timer,
+  Pause,
+  Play,
 } from "lucide-react";
 import { useSpeech, useRecognition } from "@/hooks/use-voice";
+import { useTimer } from "@/hooks/use-timer";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -59,6 +63,12 @@ const Interview = () => {
   const [autoSpeak, setAutoSpeak] = useState(true);
   const { speak, stop: stopSpeaking, isSpeaking } = useSpeech();
   const { start: startListening, stop: stopListening, isListening } = useRecognition();
+
+  const handleTimeUp = useCallback(() => {
+    toast.warning("Time's up! Submit your answer now.");
+  }, []);
+  const timer = useTimer(handleTimeUp);
+
   useEffect(() => {
     const raw = sessionStorage.getItem("interview_data");
     if (!raw) {
@@ -70,10 +80,15 @@ const Interview = () => {
     setJobDescription(data.jobDescription);
   }, [navigate]);
 
-  // Auto-speak question when it changes
+  // Auto-speak question and reset timer when question changes
   useEffect(() => {
     if (currentQuestion && autoSpeak && !answers[currentIndex]?.submitted) {
       speak(currentQuestion.question);
+    }
+    if (currentQuestion && !answers[currentIndex]?.submitted) {
+      timer.restart();
+    } else {
+      timer.reset();
     }
     return () => stopSpeaking();
   }, [currentIndex, questions.length]);
@@ -94,6 +109,7 @@ const Interview = () => {
       return;
     }
     setEvaluating(true);
+    timer.pause();
     try {
       const { data, error } = await supabase.functions.invoke("evaluate-answer", {
         body: {
@@ -159,6 +175,28 @@ const Interview = () => {
           <span className="text-xs font-mono text-muted-foreground">
             Question {currentIndex + 1} of {questions.length}
           </span>
+
+          {/* Timer */}
+          {!currentAnswer.submitted && (
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-mono transition-all ${
+              timer.isCritical
+                ? "border-destructive/50 bg-destructive/10 text-destructive animate-pulse"
+                : timer.isLow
+                ? "border-warning/50 bg-warning/10 text-warning"
+                : "border-border/60 bg-secondary/50 text-muted-foreground"
+            }`}>
+              <Timer className="w-3.5 h-3.5" />
+              <span className="w-10 text-center">{timer.formatted}</span>
+              <button
+                onClick={() => timer.isRunning ? timer.pause() : timer.start()}
+                className="p-0.5 rounded hover:bg-background/50 transition-colors"
+                title={timer.isRunning ? "Pause timer" : "Resume timer"}
+              >
+                {timer.isRunning ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+              </button>
+            </div>
+          )}
+
           <Badge variant="outline" className={`text-xs ${typeColors[currentQuestion.type]}`}>
             {currentQuestion.type}
           </Badge>
