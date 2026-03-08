@@ -1,12 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Terminal, Sparkles, History, LogIn, LogOut, BarChart3, Menu, X, UserCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [profile, setProfile] = useState<{ display_name: string | null; avatar_url: string | null } | null>(null);
+
+  useEffect(() => {
+    if (!user) { setProfile(null); return; }
+    const fetch = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("display_name, avatar_url")
+        .eq("id", user.id)
+        .single();
+      if (data) setProfile(data);
+    };
+    fetch();
+  }, [user]);
+
+  const initials = profile?.display_name
+    ? profile.display_name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    : user?.email?.[0]?.toUpperCase() || "?";
 
   const navLinks = (
     <>
@@ -36,20 +56,24 @@ const Navbar = () => {
             <BarChart3 className="w-4 h-4" />
             Dashboard
           </Link>
-          <Link
-            to="/profile"
-            onClick={() => setMobileOpen(false)}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
-          >
-            <UserCircle className="w-4 h-4" />
-            Profile
-          </Link>
         </>
       )}
       {user ? (
-        <Button variant="ghost" size="sm" onClick={() => { signOut(); setMobileOpen(false); }} className="text-xs text-muted-foreground">
-          <LogOut className="w-3.5 h-3.5" /> Sign Out
-        </Button>
+        <div className="flex items-center gap-2">
+          <Link to="/profile" onClick={() => setMobileOpen(false)}>
+            <Avatar className="w-7 h-7 border border-border/60 hover:border-primary/50 transition-colors cursor-pointer">
+              {profile?.avatar_url ? (
+                <AvatarImage src={profile.avatar_url} alt={profile.display_name || "Avatar"} />
+              ) : null}
+              <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
+          <Button variant="ghost" size="sm" onClick={() => { signOut(); setMobileOpen(false); }} className="text-xs text-muted-foreground">
+            <LogOut className="w-3.5 h-3.5" /> Sign Out
+          </Button>
+        </div>
       ) : (
         <Link to="/auth" onClick={() => setMobileOpen(false)}>
           <Button variant="ghost" size="sm" className="text-xs text-muted-foreground">
