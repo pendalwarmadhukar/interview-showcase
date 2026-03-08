@@ -12,7 +12,12 @@ import {
   Send,
   CheckCircle2,
   Trophy,
+  Volume2,
+  VolumeX,
+  Mic,
+  MicOff,
 } from "lucide-react";
+import { useSpeech, useRecognition } from "@/hooks/use-voice";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -51,7 +56,9 @@ const Interview = () => {
   const [answers, setAnswers] = useState<Record<number, AnswerData>>({});
   const [showHint, setShowHint] = useState(false);
   const [evaluating, setEvaluating] = useState(false);
-
+  const [autoSpeak, setAutoSpeak] = useState(true);
+  const { speak, stop: stopSpeaking, isSpeaking } = useSpeech();
+  const { start: startListening, stop: stopListening, isListening } = useRecognition();
   useEffect(() => {
     const raw = sessionStorage.getItem("interview_data");
     if (!raw) {
@@ -62,6 +69,14 @@ const Interview = () => {
     setQuestions(data.questions);
     setJobDescription(data.jobDescription);
   }, [navigate]);
+
+  // Auto-speak question when it changes
+  useEffect(() => {
+    if (currentQuestion && autoSpeak && !answers[currentIndex]?.submitted) {
+      speak(currentQuestion.question);
+    }
+    return () => stopSpeaking();
+  }, [currentIndex, questions.length]);
 
   const currentQuestion = questions[currentIndex];
   const currentAnswer = answers[currentIndex] || { answer: "", evaluation: null, submitted: false };
@@ -151,9 +166,29 @@ const Interview = () => {
 
         {/* Question card */}
         <div className="rounded-lg border border-border/60 bg-card p-6 mb-6 border-glow">
-          <h2 className="text-lg font-display font-bold text-card-foreground leading-relaxed">
-            {currentQuestion.question}
-          </h2>
+          <div className="flex items-start justify-between gap-3">
+            <h2 className="text-lg font-display font-bold text-card-foreground leading-relaxed flex-1">
+              {currentQuestion.question}
+            </h2>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                onClick={() => isSpeaking ? stopSpeaking() : speak(currentQuestion.question)}
+                className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                title={isSpeaking ? "Stop reading" : "Read question aloud"}
+              >
+                {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+              </button>
+              <button
+                onClick={() => setAutoSpeak(!autoSpeak)}
+                className={`p-1.5 rounded-md text-xs font-mono transition-colors ${
+                  autoSpeak ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-primary"
+                }`}
+                title={autoSpeak ? "Auto-read ON" : "Auto-read OFF"}
+              >
+                {autoSpeak ? "🔊" : "🔇"}
+              </button>
+            </div>
+          </div>
 
           {showHint && (
             <div className="mt-4 p-3 rounded-md bg-primary/5 border border-primary/20">
@@ -177,15 +212,41 @@ const Interview = () => {
         {/* Answer area */}
         {!currentAnswer.submitted ? (
           <div className="space-y-4">
-            <Textarea
-              value={currentAnswer.answer}
-              onChange={(e) => updateAnswer(e.target.value)}
-              placeholder="Type your answer here..."
-              className="min-h-[180px] bg-card border-border/60 text-sm resize-none"
-              disabled={evaluating}
-            />
+            <div className="relative">
+              <Textarea
+                value={currentAnswer.answer}
+                onChange={(e) => updateAnswer(e.target.value)}
+                placeholder={isListening ? "🎤 Listening... speak your answer" : "Type or use the mic to speak your answer..."}
+                className={`min-h-[180px] bg-card border-border/60 text-sm resize-none pr-14 ${
+                  isListening ? "border-primary/50 ring-1 ring-primary/30" : ""
+                }`}
+                disabled={evaluating}
+              />
+              <button
+                onClick={() => {
+                  if (isListening) {
+                    stopListening();
+                  } else {
+                    stopSpeaking();
+                    const supported = startListening((text) => updateAnswer(text));
+                    if (!supported) {
+                      toast.error("Speech recognition is not supported in this browser");
+                    }
+                  }
+                }}
+                disabled={evaluating}
+                className={`absolute top-3 right-3 p-2 rounded-lg transition-all ${
+                  isListening
+                    ? "bg-destructive/20 text-destructive animate-pulse"
+                    : "bg-secondary/60 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                }`}
+                title={isListening ? "Stop recording" : "Start voice input"}
+              >
+                {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+              </button>
+            </div>
             <Button
-              onClick={submitAnswer}
+              onClick={() => { stopListening(); submitAnswer(); }}
               disabled={evaluating || !currentAnswer.answer.trim()}
               className="w-full glow-primary"
             >
