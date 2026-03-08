@@ -96,6 +96,7 @@ const InterviewHistory = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Interview History" description="Review your past mock interviews and track your improvement." />
       <Navbar />
       <div className="container py-12 max-w-3xl">
         <div className="flex items-center justify-between mb-8">
