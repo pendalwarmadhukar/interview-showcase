@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
+import SEOHead from "@/components/SEOHead";
+import OnboardingDialog from "@/components/OnboardingDialog";
 import { Sparkles, FileText, MessageSquare, Trophy, ArrowRight } from "lucide-react";
 
 const steps = [
