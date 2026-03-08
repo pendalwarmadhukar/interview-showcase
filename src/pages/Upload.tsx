@@ -69,10 +69,13 @@ const Upload = () => {
     e.preventDefault();
     setDragOver(false);
     const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile && (droppedFile.type === "application/pdf" || droppedFile.type === "text/plain" || droppedFile.name.endsWith(".txt") || droppedFile.name.endsWith(".pdf"))) {
+    const name = droppedFile?.name.toLowerCase() || "";
+    const validTypes = ["application/pdf", "text/plain", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    const validExts = [".pdf", ".txt", ".docx", ".doc"];
+    if (droppedFile && (validTypes.includes(droppedFile.type) || validExts.some((ext) => name.endsWith(ext)))) {
       setFile(droppedFile);
     } else {
-      toast.error("Please upload a PDF or text file");
+      toast.error("Please upload a PDF, DOCX, or text file");
     }
   }, []);
 
