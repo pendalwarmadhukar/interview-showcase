@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { Loader2, Camera, User, Save } from "lucide-react";
+import { Loader2, Camera, User, Save, Trash2 } from "lucide-react";
 
 const ProfileSettings = () => {
   const navigate = useNavigate();
