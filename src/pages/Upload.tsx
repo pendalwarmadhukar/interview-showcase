@@ -9,11 +9,15 @@ import { toast } from "sonner";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import * as pdfjsLib from "pdfjs-dist";
+import mammoth from "mammoth";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
 
 const extractTextFromFile = async (file: File): Promise<string> => {
-  if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
+  const name = file.name.toLowerCase();
+
+  // PDF extraction
+  if (file.type === "application/pdf" || name.endsWith(".pdf")) {
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     let text = "";
@@ -25,6 +29,24 @@ const extractTextFromFile = async (file: File): Promise<string> => {
     if (!text.trim()) throw new Error("Could not extract text from this PDF. Please paste the content manually.");
     return text.trim();
   }
+
+  // DOCX extraction
+  if (
+    file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+    name.endsWith(".docx")
+  ) {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    if (!result.value.trim()) throw new Error("Could not extract text from this DOCX. Please paste the content manually.");
+    return result.value.trim();
+  }
+
+  // DOC warning
+  if (name.endsWith(".doc")) {
+    throw new Error("Legacy .doc format is not supported. Please save as .docx or paste the content manually.");
+  }
+
+  // Plain text fallback (txt, etc.)
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => resolve(e.target?.result as string);
@@ -47,10 +69,13 @@ const Upload = () => {
     e.preventDefault();
     setDragOver(false);
     const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile && (droppedFile.type === "application/pdf" || droppedFile.type === "text/plain" || droppedFile.name.endsWith(".txt") || droppedFile.name.endsWith(".pdf"))) {
+    const name = droppedFile?.name.toLowerCase() || "";
+    const validTypes = ["application/pdf", "text/plain", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    const validExts = [".pdf", ".txt", ".docx", ".doc"];
+    if (droppedFile && (validTypes.includes(droppedFile.type) || validExts.some((ext) => name.endsWith(ext)))) {
       setFile(droppedFile);
     } else {
-      toast.error("Please upload a PDF or text file");
+      toast.error("Please upload a PDF, DOCX, or text file");
     }
   }, []);
 
@@ -156,7 +181,7 @@ const Upload = () => {
             <input
               id="file-input"
               type="file"
-              accept=".pdf,.txt"
+              accept=".pdf,.txt,.docx,.doc"
               onChange={handleFileSelect}
               className="hidden"
             />
@@ -169,7 +194,8 @@ const Upload = () => {
               <>
                 <UploadIcon className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
                 <p className="text-sm text-muted-foreground">
-                  Drop a <span className="text-primary font-medium">.pdf</span> or{" "}
+                  Drop a <span className="text-primary font-medium">.pdf</span>,{" "}
+                  <span className="text-primary font-medium">.docx</span>, or{" "}
                   <span className="text-primary font-medium">.txt</span> file here
                 </p>
                 <p className="text-xs text-muted-foreground/60 mt-1">or click to browse</p>
