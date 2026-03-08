@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { Loader2, Camera, User, Save } from "lucide-react";
+import { Loader2, Camera, User, Save, Trash2 } from "lucide-react";
 
 const ProfileSettings = () => {
   const navigate = useNavigate();
@@ -72,6 +72,38 @@ const ProfileSettings = () => {
     } catch (e: any) {
       console.error("Upload error:", e);
       toast.error(e.message || "Failed to upload avatar");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const deleteAvatar = async () => {
+    if (!user || !avatarUrl) return;
+    setUploading(true);
+    try {
+      const { data: files } = await supabase.storage
+        .from("avatars")
+        .list(user.id);
+
+      if (files?.length) {
+        const paths = files.map((f) => `${user.id}/${f.name}`);
+        const { error: removeError } = await supabase.storage
+          .from("avatars")
+          .remove(paths);
+        if (removeError) throw removeError;
+      }
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: null, updated_at: new Date().toISOString() })
+        .eq("id", user.id);
+      if (updateError) throw updateError;
+
+      setAvatarUrl(null);
+      toast.success("Avatar removed!");
+    } catch (e: any) {
+      console.error("Delete avatar error:", e);
+      toast.error(e.message || "Failed to delete avatar");
     } finally {
       setUploading(false);
     }
@@ -165,6 +197,18 @@ const ProfileSettings = () => {
               />
             </div>
             <p className="text-xs text-muted-foreground">Click avatar to change • Max 2MB</p>
+            {avatarUrl && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={deleteAvatar}
+                disabled={uploading}
+                className="text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="w-3.5 h-3.5 mr-1" />
+                Remove avatar
+              </Button>
+            )}
           </div>
 
           {/* Display Name */}
